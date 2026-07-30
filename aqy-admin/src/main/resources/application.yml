@@ -7,16 +7,16 @@ ruoyi:
   # 版权年份
   copyrightYear: 2024
   # 文件路径 示例（ Windows配置D:/aqy/uploadPath，Linux配置 /home/aqy/uploadPath）
-  profile: D:/aqy/uploadPath
+  profile: ${RUOYI_PROFILE:D:/aqy/uploadPath}
   # 获取ip地址开关
   addressEnabled: false
   # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
 mqtt:
   host:
-    - ${MQTT_HOST:tcp://112.31.46.223:65527}
-  username: ${MQTT_USERNAME:admin}
-  password: ${MQTT_PASSWORD:public}
+    - ${MQTT_HOST:}
+  username: ${MQTT_USERNAME:}
+  password: ${MQTT_PASSWORD:}
   #设置是否清空session,这里如果设置为false表示服务器会保留客户端的连接记录，
   #这里设置为true表示每次连接到服务器都以新的身份连接
   cleanSession: true
@@ -58,10 +58,10 @@ mqtt:
 # 开发环境配置
 server:
   # 服务器的HTTP端口，默认为8080
-  port: 7070
+  port: ${SERVER_PORT:7070}
   servlet:
     # 应用的访问路径
-    context-path: /prod-api
+    context-path: ${SERVER_CONTEXT_PATH:/prod-api}
   tomcat:
     # tomcat的URI编码
     uri-encoding: UTF-8
@@ -76,7 +76,7 @@ server:
 # 日志配置
 logging:
   level:
-    com.ruoyi: debug
+    com.ruoyi: ${LOG_LEVEL_RUOYI:info}
     org.springframework: warn
 
 # 用户配置
@@ -110,13 +110,13 @@ spring:
   # redis 配置
   redis:
     # 地址
-    host: localhost
+    host: ${REDIS_HOST:localhost}
     # 端口，默认为6379
-    port: 6379
+    port: ${REDIS_PORT:6379}
     # 数据库索引
-    database: 0
+    database: ${REDIS_DATABASE:0}
     # 密码
-    password:
+    password: ${REDIS_PASSWORD:}
     # 连接超时时间
     timeout: 10s
     lettuce:
@@ -135,7 +135,7 @@ token:
   # 令牌自定义标识
   header: Authorization
   # 令牌密钥
-  secret: ${TOKEN_SECRET:abcdefghijklmnopqrstuvwxyz}
+  secret: ${TOKEN_SECRET:}
   # 令牌有效期（默认30分钟）
   expireTime: 30
 
@@ -174,14 +174,15 @@ aliyun:
   sms:
     accessKeyId: ${ALIYUN_SMS_ACCESS_KEY_ID:}
     accessKeySecret: ${ALIYUN_SMS_ACCESS_KEY_SECRET:}
-    signName: ${ALIYUN_SMS_SIGN_NAME:中瀚地信}
-    templateCode: ${ALIYUN_SMS_TEMPLATE_CODE:SMS_475670104}
+    signName: ${ALIYUN_SMS_SIGN_NAME:}
+    templateCode: ${ALIYUN_SMS_TEMPLATE_CODE:}
+    cooldownSeconds: ${ALIYUN_SMS_COOLDOWN_SECONDS:600}
 
 # 本地文件上传
 file:
-    domain: http://127.0.0.1:8080
-    path: D:/uploadPath
-    prefix: /zhbg
+    domain: ${FILE_DOMAIN:http://127.0.0.1:7070}
+    path: ${FILE_UPLOAD_PATH:D:/aqy/uploadPath}
+    prefix: ${FILE_PREFIX:/zhbg}
 
 #  domain: http://112.31.46.223:65521
 #  path: E:/minio/data/aqy

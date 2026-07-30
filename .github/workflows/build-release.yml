@@ -1,0 +1,83 @@
+name: Build Windows Release Package
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "8"
+          cache: maven
+
+      - name: Set up Node.js 14
+        uses: actions/setup-node@v4
+        with:
+          node-version: "14"
+
+      - name: Build backend
+        run: mvn -B clean package -DskipTests
+
+      - name: Build frontend
+        working-directory: aqy-ui
+        run: |
+          npm ci
+          npm run build:prod
+
+      - name: Assemble Windows package
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME}-${GITHUB_SHA::7}"
+          PACKAGE_DIR="zh-aqy-windows-${VERSION}"
+          mkdir -p "${PACKAGE_DIR}/server" "${PACKAGE_DIR}/web" "${PACKAGE_DIR}/bin" "${PACKAGE_DIR}/sql"
+          cp aqy-admin/target/aqy-admin.jar "${PACKAGE_DIR}/server/aqy-admin.jar"
+          cp -R aqy-ui/dist/. "${PACKAGE_DIR}/web/"
+          cp bin/windows-upgrade.ps1 "${PACKAGE_DIR}/bin/windows-upgrade.ps1"
+          cp bin/deploy-release.ps1 "${PACKAGE_DIR}/bin/deploy-release.ps1"
+          cp sql/zh_aqy_schema.sql "${PACKAGE_DIR}/sql/zh_aqy_schema.sql"
+          cp sql/ry_20240629.sql "${PACKAGE_DIR}/sql/ry_20240629.sql"
+          cp sql/quartz.sql "${PACKAGE_DIR}/sql/quartz.sql"
+          cp README.md "${PACKAGE_DIR}/README.md"
+          cat > "${PACKAGE_DIR}/START-HERE-WINDOWS.txt" <<'EOF'
+          Zh_AqY Windows release package
+
+          Existing-server upgrade:
+          1. Back up the existing MySQL database first.
+          2. Extract this package to any temporary folder.
+          3. Configure required environment variables on the server.
+          4. Run:
+             powershell -ExecutionPolicy Bypass -File .\bin\deploy-release.ps1 -DeployRoot D:\aqy -StartBackend -RestartNginx
+
+          This package does not delete, recreate, or modify your existing MySQL database.
+          Do not run initialization SQL on an existing production database unless you know exactly why.
+          EOF
+          zip -r "${PACKAGE_DIR}.zip" "${PACKAGE_DIR}"
+
+      - name: Upload Windows package
+        uses: actions/upload-artifact@v4
+        with:
+          name: zh-aqy-windows-package
+          path: zh-aqy-windows-*.zip
+
+      - name: Create GitHub release for version tags
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: zh-aqy-windows-*.zip

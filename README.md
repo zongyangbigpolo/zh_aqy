@@ -100,6 +100,13 @@ Spring Boot 后端服务（aqy-admin.jar，内置 Tomcat）
 | `DRUID_LOGIN_USERNAME` | Druid 控制台用户名 |
 | `DRUID_LOGIN_PASSWORD` | Druid 控制台密码 |
 | `TOKEN_SECRET` | JWT Token 密钥 |
+| `SERVER_PORT` | 后端 HTTP 端口，默认 `7070` |
+| `SERVER_CONTEXT_PATH` | 后端上下文路径，默认 `/prod-api` |
+| `RUOYI_PROFILE` | 平台上传文件根目录，Windows 推荐 `D:/aqy/uploadPath` |
+| `REDIS_HOST` | Redis 地址 |
+| `REDIS_PORT` | Redis 端口 |
+| `REDIS_DATABASE` | Redis 数据库索引 |
+| `REDIS_PASSWORD` | Redis 密码，没有密码时留空 |
 | `MQTT_HOST` | MQTT 地址 |
 | `MQTT_USERNAME` | MQTT 用户名 |
 | `MQTT_PASSWORD` | MQTT 密码 |
@@ -107,6 +114,10 @@ Spring Boot 后端服务（aqy-admin.jar，内置 Tomcat）
 | `ALIYUN_SMS_ACCESS_KEY_SECRET` | 阿里云短信 AccessKey Secret |
 | `ALIYUN_SMS_SIGN_NAME` | 阿里云短信签名 |
 | `ALIYUN_SMS_TEMPLATE_CODE` | 阿里云短信模板编码 |
+| `ALIYUN_SMS_COOLDOWN_SECONDS` | 同项目、同设备、同等级、同手机号短信冷却秒数，默认 `600` |
+| `FILE_DOMAIN` | 文件访问域名 |
+| `FILE_UPLOAD_PATH` | 文件上传目录 |
+| `FILE_PREFIX` | 文件 URL 前缀 |
 
 Windows 上可以通过“系统属性 -> 高级 -> 环境变量”设置，也可以在服务管理工具或启动脚本里设置。不要把这些值提交到 Git。
 
@@ -201,6 +212,11 @@ setx DB_URL "jdbc:mysql://127.0.0.1:3306/zh_aqy?useUnicode=true&characterEncodin
 setx DB_USERNAME "老数据库用户名"
 setx DB_PASSWORD "老数据库密码"
 setx TOKEN_SECRET "生产环境自己的token密钥"
+setx REDIS_HOST "127.0.0.1"
+setx REDIS_PORT "6379"
+setx REDIS_DATABASE "0"
+setx REDIS_PASSWORD ""
+setx RUOYI_PROFILE "D:/aqy/uploadPath"
 setx MQTT_HOST "tcp://实际MQTT地址:端口"
 setx MQTT_USERNAME "MQTT用户名"
 setx MQTT_PASSWORD "MQTT密码"
@@ -208,6 +224,7 @@ setx ALIYUN_SMS_ACCESS_KEY_ID "阿里云短信AccessKeyId"
 setx ALIYUN_SMS_ACCESS_KEY_SECRET "阿里云短信AccessKeySecret"
 setx ALIYUN_SMS_SIGN_NAME "短信签名"
 setx ALIYUN_SMS_TEMPLATE_CODE "短信模板CODE"
+setx ALIYUN_SMS_COOLDOWN_SECONDS "600"
 ```
 
 `setx` 写入的是持久环境变量，新开的 PowerShell、CMD 或 Windows 服务才会读取到。生产环境也可以在 Windows 图形界面或服务管理工具里配置环境变量，避免密码出现在命令历史里。
@@ -412,6 +429,65 @@ npm run build:prod
 aqy-ui/dist
 ```
 
+## GitHub Actions 自动打包
+
+仓库已经配置 GitHub Actions：
+
+```text
+.github/workflows/build-release.yml
+```
+
+它会在以下场景自动构建：
+
+- 推送到 `main` 分支。
+- 手动在 GitHub Actions 页面点击 `Run workflow`。
+- 推送 `v*` 标签，例如 `v1.0.0`，会额外创建 GitHub Release。
+
+构建内容：
+
+1. 使用 JDK 8 编译后端。
+2. 使用 Node.js 14 编译前端。
+3. 组装 Windows 可部署压缩包。
+4. 上传 artifact：`zh-aqy-windows-package`。
+
+压缩包结构：
+
+```text
+zh-aqy-windows-版本号
+├── server
+│   └── aqy-admin.jar
+├── web
+│   └── 前端静态文件
+├── bin
+│   ├── deploy-release.ps1
+│   └── windows-upgrade.ps1
+├── sql
+│   └── zh_aqy_schema.sql
+├── README.md
+└── START-HERE-WINDOWS.txt
+```
+
+下载到 Windows 服务器后：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\bin\deploy-release.ps1 `
+  -DeployRoot D:\aqy `
+  -StartBackend `
+  -RestartNginx
+```
+
+如果后端是 Windows 服务：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\bin\deploy-release.ps1 `
+  -DeployRoot D:\aqy `
+  -ServiceName ZhAqyBackend `
+  -StartBackend `
+  -RestartNginx
+```
+
+这个发布包不会自动连接、删除、重建或初始化 MySQL 数据库。老服务器升级时仍然使用原来的 `DB_URL` 指向老数据库即可。
+
 ## 全新部署
 
 全新环境才需要初始化数据库：
@@ -419,11 +495,13 @@ aqy-ui/dist
 1. 创建 MySQL 数据库，例如 `zh_aqy`。
 2. 执行 `sql/ry_20240629.sql`。
 3. 执行 `sql/quartz.sql`。
-4. 配置 Redis、MQTT、短信等运行参数。
-5. 启动后端 Jar。
-6. 将前端 `dist` 放到 Nginx / IIS。
+4. 执行 `sql/zh_aqy_schema.sql` 创建业务表。
+5. 配置 Redis、MQTT、短信等运行参数。
+6. 启动后端 Jar。
+7. 将前端 `dist` 放到 Nginx / IIS。
 
 > 注意：`sql` 目录中的脚本主要用于“新环境初始化”。老服务器已经有数据库时，不要为了升级代码重复执行初始化 SQL，否则可能覆盖或污染已有数据。
+> `sql/zh_aqy_schema.sql` 使用 `CREATE TABLE IF NOT EXISTS`，不会删除已有数据；但老库升级前仍应先备份。
 
 ## 老 Windows 服务器升级：保留原数据库
 
@@ -435,7 +513,7 @@ aqy-ui/dist
 4. 先备份数据库，再替换后端 Jar 和前端静态文件。
 5. 如果某次代码升级明确提供了“增量 SQL”，只执行增量 SQL，不执行初始化 SQL。
 
-本次“告警短信接收人配置”能力复用了已有报警联系人表和系统用户表，没有新增数据库表或字段，因此升级到当前代码不需要执行数据库变更脚本。
+本次“告警短信接收人配置”和短信冷却能力复用了已有报警联系人表和系统用户表，没有新增运行时必需表或字段，因此老库升级到当前代码不需要执行破坏性数据库脚本。
 
 ### 推荐升级流程
 
@@ -614,6 +692,7 @@ http://服务器IP/
 - 只配置“项目 A + 一级”，则只有项目 A 的一级告警会发短信。
 - 同时配置“项目 A + 一级”和“项目 A + 二级”，则项目 A 的一级、二级告警都会发短信。
 - 当前不是“二级及以上自动匹配”的阈值模式；如果要支持这种模式，需要继续扩展后端查询逻辑或配置模型。
+- 系统默认有短信冷却：同一个项目、同一个设备、同一个告警等级、同一个手机号，默认 600 秒内只发送一次，避免持续超限时短信刷屏。可通过 `ALIYUN_SMS_COOLDOWN_SECONDS` 调整，设置为 `0` 表示关闭冷却。
 
 短信发送依赖这些环境变量：
 

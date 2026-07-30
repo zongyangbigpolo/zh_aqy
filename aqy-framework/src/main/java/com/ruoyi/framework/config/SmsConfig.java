@@ -17,6 +17,9 @@ public class SmsConfig {
     @Value("${aliyun.sms.templateCode}")
     private String templateCode;
 
+    @Value("${aliyun.sms.cooldownSeconds:600}")
+    private long cooldownSeconds;
+
     // Getters and Setters
 
 
@@ -50,5 +53,13 @@ public class SmsConfig {
 
     public void setTemplateCode(String templateCode) {
         this.templateCode = templateCode;
+    }
+
+    public long getCooldownSeconds() {
+        return cooldownSeconds;
+    }
+
+    public void setCooldownSeconds(long cooldownSeconds) {
+        this.cooldownSeconds = cooldownSeconds;
     }
 }

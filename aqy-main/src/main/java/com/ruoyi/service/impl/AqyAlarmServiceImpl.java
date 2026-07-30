@@ -4,12 +4,14 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.util.ArrayUtil;
 import com.ruoyi.common.core.domain.aqy.*;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.framework.config.SmsConfig;
 import com.ruoyi.framework.web.service.SmsService;
 import com.ruoyi.service.IAqyAlarmPersonService;
 import com.ruoyi.service.IAqyAlarmRecordService;
@@ -34,6 +36,7 @@ import reactor.util.function.Tuples;
 @Service
 public class AqyAlarmServiceImpl implements IAqyAlarmService {
     private static final Logger log = LoggerFactory.getLogger(AqyAlarmServiceImpl.class);
+    private final Map<String, Long> alarmSmsSendTimes = new ConcurrentHashMap<>();
 
     @Autowired
     private AqyAlarmMapper aqyAlarmMapper;
@@ -45,6 +48,8 @@ public class AqyAlarmServiceImpl implements IAqyAlarmService {
     private IAqyAlarmPersonService aqyAlarmPersonService;
     @Autowired
     private SmsService smsService;
+    @Autowired
+    private SmsConfig smsConfig;
 
     /**
      * 查询报警等级
@@ -309,12 +314,37 @@ public class AqyAlarmServiceImpl implements IAqyAlarmService {
                         aqyAlarmPerson.getId(), aqyAlarmPerson.getContactPerson());
                 continue;
             }
+            if (isInSmsCooldown(alarmRecord, aqyAlarmPerson)) {
+                log.info("报警短信处于冷却期，跳过发送，alarmRecordId={}, alarmPersonId={}, phone={}",
+                        alarmRecord.getId(), aqyAlarmPerson.getId(), aqyAlarmPerson.getContactPersonNumber());
+                continue;
+            }
             boolean success = smsService.sendSms(templateParams, aqyAlarmPerson.getContactPersonNumber());
             if (!success) {
                 log.warn("报警短信发送失败，alarmRecordId={}, alarmPersonId={}, phone={}",
                         alarmRecord.getId(), aqyAlarmPerson.getId(), aqyAlarmPerson.getContactPersonNumber());
+            } else {
+                markSmsSent(alarmRecord, aqyAlarmPerson);
             }
         }
+    }
+
+    private boolean isInSmsCooldown(AqyAlarmRecord alarmRecord, AqyAlarmPerson alarmPerson) {
+        long cooldownMillis = Math.max(0L, smsConfig.getCooldownSeconds()) * 1000L;
+        if (cooldownMillis <= 0) {
+            return false;
+        }
+        Long lastSendTime = alarmSmsSendTimes.get(buildSmsCooldownKey(alarmRecord, alarmPerson));
+        return lastSendTime != null && System.currentTimeMillis() - lastSendTime < cooldownMillis;
+    }
+
+    private void markSmsSent(AqyAlarmRecord alarmRecord, AqyAlarmPerson alarmPerson) {
+        alarmSmsSendTimes.put(buildSmsCooldownKey(alarmRecord, alarmPerson), System.currentTimeMillis());
+    }
+
+    private String buildSmsCooldownKey(AqyAlarmRecord alarmRecord, AqyAlarmPerson alarmPerson) {
+        return alarmRecord.getProjectId() + ":" + alarmRecord.getQmtId() + ":" + alarmRecord.getAlarmLevel()
+                + ":" + alarmPerson.getContactPersonNumber();
     }
 
     private Map<String, Object> buildSmsTemplateParams(AqyAlarmRecord alarmRecord) {
