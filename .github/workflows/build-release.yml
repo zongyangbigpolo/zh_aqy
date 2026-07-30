@@ -51,6 +51,9 @@ jobs:
           cp -R aqy-ui/dist/. "${PACKAGE_DIR}/web/"
           cp bin/windows-upgrade.ps1 "${PACKAGE_DIR}/bin/windows-upgrade.ps1"
           cp bin/deploy-release.ps1 "${PACKAGE_DIR}/bin/deploy-release.ps1"
+          cp bin/windows-fresh-test-deploy.ps1 "${PACKAGE_DIR}/bin/windows-fresh-test-deploy.ps1"
+          cp bin/RUN-FRESH-WINDOWS-TEST.bat "${PACKAGE_DIR}/bin/RUN-FRESH-WINDOWS-TEST.bat"
+          cp bin/RUN-UPGRADE-EXISTING-WINDOWS.bat "${PACKAGE_DIR}/bin/RUN-UPGRADE-EXISTING-WINDOWS.bat"
           cp sql/zh_aqy_schema.sql "${PACKAGE_DIR}/sql/zh_aqy_schema.sql"
           cp sql/ry_20240629.sql "${PACKAGE_DIR}/sql/ry_20240629.sql"
           cp sql/quartz.sql "${PACKAGE_DIR}/sql/quartz.sql"
@@ -64,9 +67,19 @@ jobs:
           3. Configure required environment variables on the server.
           4. Run:
              powershell -ExecutionPolicy Bypass -File .\bin\deploy-release.ps1 -DeployRoot D:\aqy -StartBackend -RestartNginx
+             Or double-click:
+             .\bin\RUN-UPGRADE-EXISTING-WINDOWS.bat
 
-          This package does not delete, recreate, or modify your existing MySQL database.
-          Do not run initialization SQL on an existing production database unless you know exactly why.
+          Fresh Windows test machine:
+          1. Install Java 8, MySQL, Redis, and optionally nginx.
+          2. Run:
+             powershell -ExecutionPolicy Bypass -File .\bin\windows-fresh-test-deploy.ps1 -MysqlAdminUser root
+             Or double-click:
+             .\bin\RUN-FRESH-WINDOWS-TEST.bat
+
+          Existing-server upgrade scripts do not delete, recreate, or modify your existing MySQL database.
+          The fresh-test script imports initialization SQL only for empty/disposable test databases.
+          Do not run RUN-FRESH-WINDOWS-TEST.bat on an existing production/old server.
           EOF
           zip -r "${PACKAGE_DIR}.zip" "${PACKAGE_DIR}"
 

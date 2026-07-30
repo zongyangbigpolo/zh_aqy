@@ -41,12 +41,14 @@ Spring Boot 后端服务（aqy-admin.jar，内置 Tomcat）
 | 层级 | 技术 |
 | --- | --- |
 | 后端 | Java 8、Spring Boot 2.5.x、Spring Security、MyBatis、Druid |
-| 前端 | Vue 2、Vue CLI、Element UI、Axios |
+| 前端 | Vue 2.6.12、Vue CLI 4.4.x、Element UI 2.15.x、Axios、Vue Router、Vuex、ECharts |
 | 数据库 | MySQL |
 | 缓存 | Redis |
 | 设备接入 | MQTT |
 | 短信 | 阿里云短信服务 |
 | 部署 | Windows / Linux 均可，推荐后端 Jar + 前端 Nginx 静态站点 |
+
+前端不是 React，也不是移动端 App；它是 Vue 2 单页管理后台。开发目录是 `aqy-ui`，生产构建命令是 `npm run build:prod`，构建结果在 `aqy-ui/dist`。
 
 ## 目录说明
 
@@ -459,15 +461,33 @@ zh-aqy-windows-版本号
 ├── web
 │   └── 前端静态文件
 ├── bin
+│   ├── RUN-FRESH-WINDOWS-TEST.bat
+│   ├── RUN-UPGRADE-EXISTING-WINDOWS.bat
 │   ├── deploy-release.ps1
+│   ├── windows-fresh-test-deploy.ps1
 │   └── windows-upgrade.ps1
 ├── sql
+│   ├── ry_20240629.sql
+│   ├── quartz.sql
 │   └── zh_aqy_schema.sql
 ├── README.md
 └── START-HERE-WINDOWS.txt
 ```
 
-下载到 Windows 服务器后：
+下载到 Windows 服务器后，先按场景选脚本：
+
+| 场景 | 使用脚本 | 是否初始化数据库 |
+| --- | --- | --- |
+| 全新 Windows 测试机、空数据库、可丢弃测试数据 | `bin\RUN-FRESH-WINDOWS-TEST.bat` | 会初始化空测试库 |
+| 已经部署过老代码、有老 MySQL 数据的 Windows 服务器 | `bin\RUN-UPGRADE-EXISTING-WINDOWS.bat` 或 `bin\deploy-release.ps1` | 不会碰数据库 |
+
+老服务器升级可以双击：
+
+```text
+bin\RUN-UPGRADE-EXISTING-WINDOWS.bat
+```
+
+也可以手动执行：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\bin\deploy-release.ps1 `
@@ -486,7 +506,67 @@ powershell -ExecutionPolicy Bypass -File .\bin\deploy-release.ps1 `
   -RestartNginx
 ```
 
-这个发布包不会自动连接、删除、重建或初始化 MySQL 数据库。老服务器升级时仍然使用原来的 `DB_URL` 指向老数据库即可。
+老服务器升级脚本不会自动连接、删除、重建或初始化 MySQL 数据库。老服务器升级时仍然使用原来的 `DB_URL` 指向老数据库即可。
+
+> 不要在老服务器上双击 `RUN-FRESH-WINDOWS-TEST.bat`。它是全新测试机脚本，会导入初始化 SQL；虽然脚本会拒绝向非空数据库导入初始化 SQL，但老服务器应始终使用升级脚本。
+
+## 全新 Windows 测试机一键脚本
+
+如果是一台全新的 Windows 测试机，可以下载 GitHub Actions 生成的 `zh-aqy-windows-package`，解压后运行：
+
+```text
+双击 bin\RUN-FRESH-WINDOWS-TEST.bat
+```
+
+或者手动执行 PowerShell：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\bin\windows-fresh-test-deploy.ps1 `
+  -MysqlAdminUser root
+```
+
+脚本会提示输入 MySQL 管理员密码，然后自动执行：
+
+1. 检查 `java`、`mysql.exe`、Redis 是否可用。
+2. 创建测试库，默认库名 `zh_aqy`。
+3. 创建应用数据库用户，默认用户 `zh_aqy_app`。
+4. 按顺序导入：
+   - `sql/ry_20240629.sql`
+   - `sql/quartz.sql`
+   - `sql/zh_aqy_schema.sql`
+5. 生成本次测试所需的运行环境变量。
+6. 部署后端到 `D:\aqy\server`，部署前端到 `D:\aqy\web`。
+7. 生成后端复用启动脚本：`D:\aqy\server\run-backend.ps1`。
+8. 启动后端。
+9. 如果能找到 `nginx.exe`，自动生成测试用 Nginx 配置并启动前端站点。
+
+常用参数：
+
+```powershell
+# 指定 MySQL 客户端和部署目录
+powershell -ExecutionPolicy Bypass -File .\bin\windows-fresh-test-deploy.ps1 `
+  -MysqlAdminUser root `
+  -MysqlCli "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" `
+  -DeployRoot D:\aqy
+
+# 指定 Nginx 路径
+powershell -ExecutionPolicy Bypass -File .\bin\windows-fresh-test-deploy.ps1 `
+  -MysqlAdminUser root `
+  -NginxExe C:\nginx\nginx.exe
+
+# 如果只是先测后端，暂时没有 Nginx
+powershell -ExecutionPolicy Bypass -File .\bin\windows-fresh-test-deploy.ps1 `
+  -MysqlAdminUser root `
+  -SkipNginx
+```
+
+> 这个脚本是“全新测试环境一键部署”脚本，不是老服务器升级脚本。它会执行带 `DROP TABLE IF EXISTS` 的初始化 SQL，所以默认只允许导入到空数据库。如果目标数据库已经有表，脚本会拒绝继续，避免误伤老数据。
+
+脚本运行完成后：
+
+- 后端健康检查：`http://127.0.0.1:7070/prod-api/captchaImage`
+- 前端地址：`http://127.0.0.1/`
+- 后续手动启动后端：右键 PowerShell 执行 `D:\aqy\server\run-backend.ps1`
 
 ## 全新部署
 
