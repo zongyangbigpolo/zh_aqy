@@ -1,7 +1,10 @@
 package com.ruoyi.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.common.core.domain.aqy.Vo.AqyAlarmSmsUserVo;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +23,7 @@ import com.ruoyi.common.core.domain.aqy.AqyAlarmPerson;
 import com.ruoyi.service.IAqyAlarmPersonService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.system.service.ISysUserService;
 
 /**
  * 报警联系人Controller
@@ -33,6 +37,8 @@ public class AqyAlarmPersonController extends BaseController
 {
     @Autowired
     private IAqyAlarmPersonService aqyAlarmPersonService;
+    @Autowired
+    private ISysUserService sysUserService;
 
     /**
      * 查询报警联系人列表
@@ -44,6 +50,30 @@ public class AqyAlarmPersonController extends BaseController
         startPage();
         List<AqyAlarmPerson> list = aqyAlarmPersonService.selectAqyAlarmPersonList(aqyAlarmPerson);
         return getDataTable(list);
+    }
+
+    /**
+     * 查询可配置为报警短信接收人的系统用户。
+     */
+    @PreAuthorize("@ss.hasPermi('aqy:alarmPerson:list')")
+    @GetMapping("/userOptions")
+    public AjaxResult userOptions(SysUser sysUser)
+    {
+        sysUser.setStatus("0");
+        List<AqyAlarmSmsUserVo> users = sysUserService.selectUserList(sysUser).stream()
+                .filter(user -> user.getPhonenumber() != null && !"".equals(user.getPhonenumber()))
+                .map(this::toAlarmSmsUserVo)
+                .collect(Collectors.toList());
+        return success(users);
+    }
+
+    private AqyAlarmSmsUserVo toAlarmSmsUserVo(SysUser user) {
+        AqyAlarmSmsUserVo vo = new AqyAlarmSmsUserVo();
+        vo.setUserId(user.getUserId());
+        vo.setUserName(user.getUserName());
+        vo.setNickName(user.getNickName());
+        vo.setPhonenumber(user.getPhonenumber());
+        return vo;
     }
 
     /**

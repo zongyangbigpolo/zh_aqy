@@ -125,8 +125,7 @@
                v-el-drag-dialog>
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="工程项目" prop="projectId">
-          <el-select v-model="form.projectId" placeholder="请选择工程项目" style="width: 100%"
-                     @change="handleChangeProject">
+          <el-select v-model="form.projectId" placeholder="请选择工程项目" style="width: 100%">
             <el-option v-for="(item,index ) in projectOptions" :key='index' :value="item.id"
                        :label="item.name"></el-option>
           </el-select>
@@ -137,11 +136,37 @@
                        :label="item.name"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item v-if="!form.id" label="接收用户" prop="userIds">
+          <el-select
+            v-model="form.userIds"
+            multiple
+            filterable
+            clearable
+            placeholder="请选择可接收短信的系统用户"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="user in userOptions"
+              :key="user.userId"
+              :value="user.userId"
+              :label="formatUserOption(user)"
+            />
+          </el-select>
+          <div class="el-form-item__tip">选择多个用户时，会按每个用户的手机号分别创建报警短信接收配置。</div>
+        </el-form-item>
         <el-form-item label="联系人姓名" prop="contactPerson">
-          <el-input v-model="form.contactPerson" placeholder="请输入联系人姓名"/>
+          <el-input
+            v-model="form.contactPerson"
+            :disabled="form.userIds && form.userIds.length > 0"
+            placeholder="请输入联系人姓名"
+          />
         </el-form-item>
         <el-form-item label="联系方式" prop="contactPersonNumber">
-          <el-input v-model="form.contactPersonNumber" placeholder="请输入联系方式"/>
+          <el-input
+            v-model="form.contactPersonNumber"
+            :disabled="form.userIds && form.userIds.length > 0"
+            placeholder="请输入联系方式"
+          />
         </el-form-item>
 
       </el-form>
@@ -156,6 +181,7 @@
 <script>
 import {
   listAlarmPerson,
+  listAlarmSmsUsers,
   getAlarmPerson,
   delAlarmPerson,
   addAlarmPerson,
@@ -197,6 +223,7 @@ export default {
         createUid: null,
         isDelete: null
       },
+      userOptions: [],
       // 表单参数
       form: {},
       // 表单校验
@@ -204,7 +231,15 @@ export default {
         projectId: [
           {required: true, message: "请选择工程项目", trigger: "blur"}
         ],
-
+        alarmLevel: [
+          {required: true, message: "请选择报警等级", trigger: "blur"}
+        ],
+        contactPerson: [
+          {validator: (rule, value, callback) => this.validateManualContact(rule, value, callback, "请输入联系人姓名"), trigger: "blur"}
+        ],
+        contactPersonNumber: [
+          {validator: (rule, value, callback) => this.validateManualContact(rule, value, callback, "请输入联系方式"), trigger: "blur"}
+        ],
       },
       levelOptions: [
         {id: 3, name: '三级'},
@@ -214,12 +249,31 @@ export default {
     };
   },
   created() {
+    this.getUserOptions();
     this.getList();
   },
   methods: {
+    formatUserOption(user) {
+      const name = user.nickName || user.userName
+      return `${name}（${user.phonenumber}）`
+    },
+    validateManualContact(rule, value, callback, message) {
+      if (this.form.userIds && this.form.userIds.length > 0) {
+        callback()
+      } else if (!value) {
+        callback(new Error(message))
+      } else {
+        callback()
+      }
+    },
     functionProjectName(projectId) {
       const project = this.projectOptions.find(item => item.id === projectId)
       return project ? project.name : ''
+    },
+    getUserOptions() {
+      listAlarmSmsUsers({pageNum: 1, pageSize: 1000}).then(response => {
+        this.userOptions = response.data || [];
+      });
     },
     getProjects() {
       listProject().then(response => {
@@ -254,6 +308,7 @@ export default {
         alarmLevel: null,
         contactPerson: null,
         contactPersonNumber: null,
+        userIds: [],
         createTime: null,
         createUid: null,
         isDelete: null
@@ -299,6 +354,25 @@ export default {
           if (this.form.id != null) {
             updateAlarmPerson(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
+              this.open = false;
+              this.getList();
+            });
+          } else if (this.form.userIds && this.form.userIds.length > 0) {
+            const selectedUsers = this.userOptions.filter(user => this.form.userIds.includes(user.userId));
+            if (selectedUsers.length === 0) {
+              this.$modal.msgError("请选择有效的短信接收用户");
+              return;
+            }
+            const requests = selectedUsers.map(user => addAlarmPerson({
+              projectId: this.form.projectId,
+              alarmLevel: this.form.alarmLevel,
+              contactPerson: user.nickName || user.userName,
+              contactPersonNumber: user.phonenumber,
+              createUid: this.form.createUid,
+              isDelete: this.form.isDelete
+            }));
+            Promise.all(requests).then(() => {
+              this.$modal.msgSuccess("新增成功");
               this.open = false;
               this.getList();
             });

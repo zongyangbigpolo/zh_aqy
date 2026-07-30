@@ -8,18 +8,18 @@ import java.util.stream.Collectors;
 
 import cn.hutool.core.util.ArrayUtil;
 import com.ruoyi.common.core.domain.aqy.*;
-import com.ruoyi.common.exception.job.TaskException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.websocket.WebSocketUsers;
+import com.ruoyi.framework.web.service.SmsService;
 import com.ruoyi.service.IAqyAlarmPersonService;
 import com.ruoyi.service.IAqyAlarmRecordService;
 import com.ruoyi.service.IAqyEquipmentService;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.mapper.AqyAlarmMapper;
 import com.ruoyi.service.IAqyAlarmService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuple3;
 import reactor.util.function.Tuple4;
@@ -33,6 +33,8 @@ import reactor.util.function.Tuples;
  */
 @Service
 public class AqyAlarmServiceImpl implements IAqyAlarmService {
+    private static final Logger log = LoggerFactory.getLogger(AqyAlarmServiceImpl.class);
+
     @Autowired
     private AqyAlarmMapper aqyAlarmMapper;
     @Autowired
@@ -41,6 +43,8 @@ public class AqyAlarmServiceImpl implements IAqyAlarmService {
     private IAqyAlarmRecordService aqyAlarmRecordService;
     @Autowired
     private IAqyAlarmPersonService aqyAlarmPersonService;
+    @Autowired
+    private SmsService smsService;
 
     /**
      * 查询报警等级
@@ -282,20 +286,51 @@ public class AqyAlarmServiceImpl implements IAqyAlarmService {
             aqyAlarmRecord.setRecordTime(DateUtils.getNowDate());
             aqyAlarmRecordService.insertAqyAlarmRecord(aqyAlarmRecord);
 
-            // 发送报警信息给相关人员
-            sendAlarmMessageToPerson(aqyAlarm.getAlarmLevel());
+            sendAlarmMessageToPerson(aqyAlarmRecord, aqyAlarm);
         } catch (Exception ex) {
-
+            log.error("保存或发送报警通知失败，eqmtId={}, levelId={}", aqyEquipment.getId(), levelId, ex);
         }
     }
 
-    private void sendAlarmMessageToPerson(Integer alarmLevel) {
+    private void sendAlarmMessageToPerson(AqyAlarmRecord alarmRecord, AqyAlarm alarm) {
         AqyAlarmPerson query = new AqyAlarmPerson();
-        query.setAlarmLevel(alarmLevel);
+        query.setProjectId(alarmRecord.getProjectId());
+        query.setAlarmLevel(alarm.getAlarmLevel());
         List<AqyAlarmPerson> aqyAlarmPeople = aqyAlarmPersonService.selectAqyAlarmPersonList(query);
-        // 调用短信接口，发送短信
-        for (AqyAlarmPerson aqyAlarmPerson : aqyAlarmPeople) {
-            
+        if (aqyAlarmPeople == null || aqyAlarmPeople.isEmpty()) {
+            log.info("未配置报警短信接收人，projectId={}, alarmLevel={}", alarmRecord.getProjectId(), alarm.getAlarmLevel());
+            return;
         }
+
+        Map<String, Object> templateParams = buildSmsTemplateParams(alarmRecord);
+        for (AqyAlarmPerson aqyAlarmPerson : aqyAlarmPeople) {
+            if (StringUtils.isBlank(aqyAlarmPerson.getContactPersonNumber())) {
+                log.warn("报警短信接收人手机号为空，alarmPersonId={}, contactPerson={}",
+                        aqyAlarmPerson.getId(), aqyAlarmPerson.getContactPerson());
+                continue;
+            }
+            boolean success = smsService.sendSms(templateParams, aqyAlarmPerson.getContactPersonNumber());
+            if (!success) {
+                log.warn("报警短信发送失败，alarmRecordId={}, alarmPersonId={}, phone={}",
+                        alarmRecord.getId(), aqyAlarmPerson.getId(), aqyAlarmPerson.getContactPersonNumber());
+            }
+        }
+    }
+
+    private Map<String, Object> buildSmsTemplateParams(AqyAlarmRecord alarmRecord) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("projectId", alarmRecord.getProjectId());
+        params.put("equipment", alarmRecord.getEqmtName());
+        params.put("eqmtName", alarmRecord.getEqmtName());
+        params.put("alarmLevel", alarmRecord.getAlarmLevel());
+        params.put("level", alarmRecord.getAlarmLevel());
+        params.put("alarmContent", alarmRecord.getAlarmContent());
+        params.put("content", alarmRecord.getAlarmContent());
+        params.put("recordTime", DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, alarmRecord.getRecordTime()));
+        params.put("time", DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, alarmRecord.getRecordTime()));
+        params.put("value1", alarmRecord.getAccumulativeValue1());
+        params.put("value2", alarmRecord.getAccumulativeValue2());
+        params.put("value3", alarmRecord.getAccumulativeValue3());
+        return params;
     }
 }

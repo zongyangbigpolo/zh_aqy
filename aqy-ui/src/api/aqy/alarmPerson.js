@@ -9,6 +9,15 @@ export function listAlarmPerson(query) {
   })
 }
 
+// 查询可接收报警短信的系统用户
+export function listAlarmSmsUsers(query) {
+  return request({
+    url: '/aqy/alarmPerson/userOptions',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询报警联系人详细
 export function getAlarmPerson(id) {
   return request({
