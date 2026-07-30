@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mapper.AqyProjectMapper">
+
+    <resultMap type="AqyProject" id="AqyProjectResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="projectType"    column="project_type"    />
+        <result property="city"    column="city"    />
+        <result property="companyName"    column="company_name"    />
+        <result property="projectDesc"    column="project_desc"    />
+        <result property="longitude"    column="longitude"    />
+        <result property="latitude"    column="latitude"    />
+        <result property="elevation"    column="elevation"    />
+        <result property="courseAngle"    column="course_angle"    />
+        <result property="depressionAngle"    column="depression_angle"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createUid"    column="create_uid"    />
+        <result property="isDelete"    column="is_delete"    />
+        <result property="yzCompany"    column="yz_company"    />
+        <result property="jsCompany"    column="js_company"    />
+        <result property="projectStartDate"    column="project_start_date"    />
+    </resultMap>
+
+    <sql id="selectAqyProjectVo">
+        select id, name, project_type, city, company_name, project_desc, longitude, latitude, elevation,
+               course_angle, depression_angle, create_time, create_uid, is_delete, yz_company, js_company,
+               project_start_date
+        from aqy_project
+    </sql>
+
+    <select id="selectAqyProjectList" parameterType="AqyProject" resultMap="AqyProjectResult">
+        <include refid="selectAqyProjectVo"/>
+        <where>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="projectType != null  and projectType != ''"> and project_type = #{projectType}</if>
+            <if test="companyName != null  and companyName != ''"> and company_name like concat('%', #{companyName}, '%')</if>
+            <if test="longitude != null "> and longitude = #{longitude}</if>
+            <if test="latitude != null "> and latitude = #{latitude}</if>
+            <if test="elevation != null "> and elevation = #{elevation}</if>
+            <if test="courseAngle != null "> and course_angle = #{courseAngle}</if>
+            <if test="depressionAngle != null "> and depression_angle = #{depressionAngle}</if>
+            <if test="createUid != null "> and create_uid = #{createUid}</if>
+            <if test="isDelete != null "> and is_delete = #{isDelete}</if>
+        </where>
+    </select>
+
+    <select id="selectAqyProjectById" parameterType="Long" resultMap="AqyProjectResult">
+        <include refid="selectAqyProjectVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertAqyProject" parameterType="AqyProject" useGeneratedKeys="true" keyProperty="id">
+        insert into aqy_project
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="projectType != null">project_type,</if>
+            <if test="city != null">city,</if>
+            <if test="companyName != null">company_name,</if>
+            <if test="projectDesc != null">project_desc,</if>
+            <if test="longitude != null">longitude,</if>
+            <if test="latitude != null">latitude,</if>
+            <if test="elevation != null">elevation,</if>
+            <if test="courseAngle != null">course_angle,</if>
+            <if test="depressionAngle != null">depression_angle,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createUid != null">create_uid,</if>
+            <if test="isDelete != null">is_delete,</if>
+            <if test="yzCompany != null">yz_company,</if>
+            <if test="jsCompany != null">js_company,</if>
+            <if test="projectStartDate != null">project_start_date,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="projectType != null">#{projectType},</if>
+            <if test="city != null">#{city},</if>
+            <if test="companyName != null">#{companyName},</if>
+            <if test="projectDesc != null">#{projectDesc},</if>
+            <if test="longitude != null">#{longitude},</if>
+            <if test="latitude != null">#{latitude},</if>
+            <if test="elevation != null">#{elevation},</if>
+            <if test="courseAngle != null">#{courseAngle},</if>
+            <if test="depressionAngle != null">#{depressionAngle},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createUid != null">#{createUid},</if>
+            <if test="isDelete != null">#{isDelete},</if>
+            <if test="yzCompany != null">#{yzCompany},</if>
+            <if test="jsCompany != null">#{jsCompany},</if>
+            <if test="projectStartDate != null">#{projectStartDate},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAqyProject" parameterType="AqyProject">
+        update aqy_project
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name = #{name},</if>
+            <if test="projectType != null">project_type = #{projectType},</if>
+            <if test="city != null">city = #{city},</if>
+            <if test="companyName != null">company_name = #{companyName},</if>
+            <if test="projectDesc != null">project_desc = #{projectDesc},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="latitude != null">latitude = #{latitude},</if>
+            <if test="elevation != null">elevation = #{elevation},</if>
+            <if test="courseAngle != null">course_angle = #{courseAngle},</if>
+            <if test="depressionAngle != null">depression_angle = #{depressionAngle},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUid != null">create_uid = #{createUid},</if>
+            <if test="isDelete != null">is_delete = #{isDelete},</if>
+            <if test="yzCompany != null">yz_company = #{yzCompany},</if>
+            <if test="jsCompany != null">js_company = #{jsCompany},</if>
+            <if test="projectStartDate != null">project_start_date = #{projectStartDate},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAqyProjectById" parameterType="Long">
+        delete from aqy_project where id = #{id}
+    </delete>
+
+    <delete id="deleteAqyProjectByIds" parameterType="String">
+        delete from aqy_project where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mapper.AqyEquipmentImageMapper">
+    
+    <resultMap type="AqyEquipmentImage" id="AqyEquipmentImageResult">
+        <result property="id"    column="id"    />
+        <result property="equipmentId"    column="equipment_id"    />
+        <result property="imageUrl"    column="image_url"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectAqyEquipmentImageVo">
+        select id, equipment_id, image_url,create_time from aqy_equipment_image
+    </sql>
+
+    <select id="selectAqyEquipmentImageList" parameterType="AqyEquipmentImage" resultMap="AqyEquipmentImageResult">
+        <include refid="selectAqyEquipmentImageVo"/>
+        <where>  
+            <if test="equipmentId != null "> and equipment_id = #{equipmentId}</if>
+            <if test="imageUrl != null  and imageUrl != ''"> and image_url = #{imageUrl}</if>
+        </where>
+    </select>
+    
+    <select id="selectAqyEquipmentImageById" parameterType="Long" resultMap="AqyEquipmentImageResult">
+        <include refid="selectAqyEquipmentImageVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertAqyEquipmentImage" parameterType="AqyEquipmentImage" useGeneratedKeys="true" keyProperty="id">
+        insert into aqy_equipment_image
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="equipmentId != null">equipment_id,</if>
+            <if test="imageUrl != null">image_url,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="equipmentId != null">#{equipmentId},</if>
+            <if test="imageUrl != null">#{imageUrl},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAqyEquipmentImage" parameterType="AqyEquipmentImage">
+        update aqy_equipment_image
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="equipmentId != null">equipment_id = #{equipmentId},</if>
+            <if test="imageUrl != null">image_url = #{imageUrl},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAqyEquipmentImageById" parameterType="Long">
+        delete from aqy_equipment_image where id = #{id}
+    </delete>
+
+    <delete id="deleteAqyEquipmentImageByIds" parameterType="String">
+        delete from aqy_equipment_image where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

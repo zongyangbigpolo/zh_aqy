@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mapper.AqyAlarmMapper">
+
+    <resultMap type="AqyAlarm" id="AqyAlarmResult">
+        <result property="id"    column="id"    />
+        <result property="eqmtType"    column="eqmt_type"    />
+        <result property="alarmLevel"    column="alarm_level"    />
+        <result property="instantThresholdValue"    column="instant_threshold_value"    />
+        <result property="accumulativeThresholdValue"    column="accumulative_threshold_value"    />
+        <result property="upperLimit"    column="upper_limit"    />
+        <result property="lowerLimit"    column="lower_limit"    />
+        <result property="alarmColor"    column="alarm_color"    />
+        <result property="alarmTemplate"    column="alarm_template"    />
+        <result property="alarmCount"    column="alarm_count"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createUid"    column="create_uid"    />
+        <result property="isDelete"    column="is_delete"    />
+        <result property="cronExpress"    column="cron_express"    />
+    </resultMap>
+
+    <sql id="selectAqyAlarmVo">
+        select id, eqmt_type, alarm_level, instant_threshold_value, accumulative_threshold_value,
+               upper_limit, lower_limit, alarm_color, alarm_template, alarm_count, create_time, create_uid, is_delete, cron_express
+        from aqy_alarm
+    </sql>
+
+    <select id="selectAqyAlarmList" parameterType="AqyAlarm" resultMap="AqyAlarmResult">
+        <include refid="selectAqyAlarmVo"/>
+        <where>
+            <if test="eqmtType != null "> and eqmt_type = #{eqmtType}</if>
+            <if test="alarmLevel != null "> and alarm_level = #{alarmLevel}</if>
+            <if test="instantThresholdValue != null "> and instant_threshold_value = #{instantThresholdValue}</if>
+            <if test="accumulativeThresholdValue != null "> and accumulative_threshold_value = #{accumulativeThresholdValue}</if>
+            <if test="isDelete != null "> and is_delete = #{isDelete}</if>
+        </where>
+        order by eqmt_type, alarm_level asc
+    </select>
+
+    <select id="selectAqyAlarmById" parameterType="Long" resultMap="AqyAlarmResult">
+        <include refid="selectAqyAlarmVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertAqyAlarm" parameterType="AqyAlarm" useGeneratedKeys="true" keyProperty="id">
+        insert into aqy_alarm
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="eqmtType != null">eqmt_type,</if>
+            <if test="alarmLevel != null">alarm_level,</if>
+            <if test="instantThresholdValue != null">instant_threshold_value,</if>
+            <if test="accumulativeThresholdValue != null">accumulative_threshold_value,</if>
+            <if test="upperLimit != null">upper_limit,</if>
+            <if test="lowerLimit != null">lower_limit,</if>
+            <if test="alarmColor != null">alarm_color,</if>
+            <if test="alarmTemplate != null">alarm_template,</if>
+            <if test="alarmCount != null">alarm_count,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createUid != null">create_uid,</if>
+            <if test="isDelete != null">is_delete,</if>
+            <if test="cronExpress != null">cron_express,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="eqmtType != null">#{eqmtType},</if>
+            <if test="alarmLevel != null">#{alarmLevel},</if>
+            <if test="instantThresholdValue != null">#{instantThresholdValue},</if>
+            <if test="accumulativeThresholdValue != null">#{accumulativeThresholdValue},</if>
+            <if test="upperLimit != null">#{upperLimit},</if>
+            <if test="lowerLimit != null">#{lowerLimit},</if>
+            <if test="alarmColor != null">#{alarmColor},</if>
+            <if test="alarmTemplate != null">#{alarmTemplate},</if>
+            <if test="alarmCount != null">#{alarmCount},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createUid != null">#{createUid},</if>
+            <if test="isDelete != null">#{isDelete},</if>
+            <if test="cronExpress != null">#{cronExpress},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAqyAlarm" parameterType="AqyAlarm">
+        update aqy_alarm
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="eqmtType != null">eqmt_type = #{eqmtType},</if>
+            <if test="alarmLevel != null">alarm_level = #{alarmLevel},</if>
+            <if test="instantThresholdValue != null">instant_threshold_value = #{instantThresholdValue},</if>
+            <if test="accumulativeThresholdValue != null">accumulative_threshold_value = #{accumulativeThresholdValue},</if>
+            <if test="upperLimit != null">upper_limit = #{upperLimit},</if>
+            <if test="lowerLimit != null">lower_limit = #{lowerLimit},</if>
+            <if test="alarmColor != null">alarm_color = #{alarmColor},</if>
+            <if test="alarmTemplate != null">alarm_template = #{alarmTemplate},</if>
+            <if test="alarmCount != null">alarm_count = #{alarmCount},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUid != null">create_uid = #{createUid},</if>
+            <if test="isDelete != null">is_delete = #{isDelete},</if>
+            <if test="cronExpress != null">cron_express = #{cronExpress},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAqyAlarmById" parameterType="Long">
+        delete from aqy_alarm where id = #{id}
+    </delete>
+
+    <delete id="deleteAqyAlarmByIds" parameterType="String">
+        delete from aqy_alarm where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

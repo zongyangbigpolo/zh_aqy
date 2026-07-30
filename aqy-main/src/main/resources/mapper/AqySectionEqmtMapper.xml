@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mapper.AqySectionEqmtMapper">
+
+    <resultMap type="AqySectionEqmt" id="AqySectionEqmtResult">
+        <result property="id"    column="id"    />
+        <result property="sectionId"    column="section_id"    />
+        <result property="eqmtTypeId"    column="eqmt_type_id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createUid"    column="create_uid"    />
+        <result property="isDelete"    column="is_delete"    />
+        <collection property="children" column="{eqmtTypeId=eqmt_type_id}"
+                    select="com.ruoyi.mapper.AqyEquipmentMapper.selectAqyEquipmentListByEqmtTypeId"/>
+    </resultMap>
+
+    <sql id="selectAqySectionEqmtVo">
+        select id, section_id, eqmt_type_id, create_time, create_uid, is_delete from aqy_section_eqmt
+    </sql>
+
+    <select id="selectAqySectionEqmtList" parameterType="AqySectionEqmt" resultMap="AqySectionEqmtResult">
+        <include refid="selectAqySectionEqmtVo"/>
+        <where>
+            <if test="sectionId != null "> and section_id = #{sectionId}</if>
+            <if test="eqmtTypeId != null "> and eqmt_type_id = #{eqmtTypeId}</if>
+            <if test="createUid != null "> and create_uid = #{createUid}</if>
+            <if test="isDelete != null "> and is_delete = #{isDelete}</if>
+        </where>
+    </select>
+
+    <select id="selectAqySectionEqmtListBySectionId" resultMap="AqySectionEqmtResult">
+        select id, section_id, eqmt_type_id, create_time, create_uid, is_delete from aqy_section_eqmt where section_id = #{sectionId}
+    </select>
+
+
+    <select id="selectAqySectionEqmtById" parameterType="Long" resultMap="AqySectionEqmtResult">
+        <include refid="selectAqySectionEqmtVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertAqySectionEqmt" parameterType="AqySectionEqmt" useGeneratedKeys="true" keyProperty="id">
+        insert into aqy_section_eqmt
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="sectionId != null">section_id,</if>
+            <if test="eqmtTypeId != null">eqmt_type_id,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createUid != null">create_uid,</if>
+            <if test="isDelete != null">is_delete,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="sectionId != null">#{sectionId},</if>
+            <if test="eqmtTypeId != null">#{eqmtTypeId},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createUid != null">#{createUid},</if>
+            <if test="isDelete != null">#{isDelete},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAqySectionEqmt" parameterType="AqySectionEqmt">
+        update aqy_section_eqmt
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="sectionId != null">section_id = #{sectionId},</if>
+            <if test="eqmtTypeId != null">eqmt_type_id = #{eqmtTypeId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUid != null">create_uid = #{createUid},</if>
+            <if test="isDelete != null">is_delete = #{isDelete},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAqySectionEqmtById" parameterType="Long">
+        delete from aqy_section_eqmt where id = #{id}
+    </delete>
+
+
+    <delete id="deleteAqySectionEqmtBySectionId" parameterType="Long">
+        delete from aqy_section_eqmt where section_id = #{id}
+    </delete>
+
+    <delete id="deleteAqySectionEqmtByIds" parameterType="String">
+        delete from aqy_section_eqmt where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="listEqmtTypeByProjectId" parameterType="Long" resultType="String">
+        select DISTINCT(d.eqmt_type_name) from aqy_section_eqmt a
+                                                   left join aqy_section b on b.id=a.section_id
+                                                   left join aqy_project c on c.id=b.project_id
+                                                   left join aqy_equipment_type d on d.id=a.eqmt_type_id
+        where b.project_id=#{projectId}
+    </select>
+</mapper>

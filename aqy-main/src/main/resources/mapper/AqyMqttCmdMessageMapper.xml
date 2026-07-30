@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mapper.AqyMqttCmdMessageMapper">
+
+    <resultMap type="AqyMqttCmdMessage" id="AqyMqttCmdMessageResult">
+        <result property="id"    column="id"    />
+        <result property="cmdType"    column="cmd_type"    />
+        <result property="eqmtCode"    column="eqmt_code"    />
+        <result property="msgId"    column="msg_id"    />
+        <result property="msgData"    column="msg_data"    />
+        <result property="replyRest"    column="reply_rest"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectAqyMqttCmdMessageVo">
+        select id, cmd_type, eqmt_code, msg_id, msg_data, reply_rest, create_time from aqy_mqtt_cmd_message
+    </sql>
+
+    <select id="selectAqyMqttCmdMessageList" parameterType="AqyMqttCmdMessage" resultMap="AqyMqttCmdMessageResult">
+        <include refid="selectAqyMqttCmdMessageVo"/>
+        <where>
+            <if test="cmdType != null  and cmdType != ''"> and cmd_type = #{cmdType}</if>
+            <if test="eqmtCode != null  and eqmtCode != ''"> and eqmt_code = #{eqmtCode}</if>
+            <if test="msgId != null "> and msg_id = #{msgId}</if>
+            <if test="msgData != null  and msgData != ''"> and msg_data = #{msgData}</if>
+            <if test="replyRest != null  and replyRest != ''"> and reply_rest = #{replyRest}</if>
+        </where>
+    </select>
+
+    <select id="selectAqyMqttCmdMessageById" parameterType="Long" resultMap="AqyMqttCmdMessageResult">
+        <include refid="selectAqyMqttCmdMessageVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertAqyMqttCmdMessage" parameterType="AqyMqttCmdMessage" useGeneratedKeys="true" keyProperty="id">
+        insert into aqy_mqtt_cmd_message
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="cmdType != null">cmd_type,</if>
+            <if test="eqmtCode != null and eqmtCode != ''">eqmt_code,</if>
+            <if test="msgId != null">msg_id,</if>
+            <if test="msgData != null">msg_data,</if>
+            <if test="replyRest != null">reply_rest,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="cmdType != null">#{cmdType},</if>
+            <if test="eqmtCode != null and eqmtCode != ''">#{eqmtCode},</if>
+            <if test="msgId != null">#{msgId},</if>
+            <if test="msgData != null">#{msgData},</if>
+            <if test="replyRest != null">#{replyRest},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAqyMqttCmdMessage" parameterType="AqyMqttCmdMessage">
+        update aqy_mqtt_cmd_message
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="cmdType != null">cmd_type = #{cmdType},</if>
+            <if test="eqmtCode != null and eqmtCode != ''">eqmt_code = #{eqmtCode},</if>
+            <if test="msgId != null">msg_id = #{msgId},</if>
+            <if test="msgData != null">msg_data = #{msgData},</if>
+            <if test="replyRest != null">reply_rest = #{replyRest},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAqyMqttCmdMessageById" parameterType="Long">
+        delete from aqy_mqtt_cmd_message where id = #{id}
+    </delete>
+
+    <delete id="deleteAqyMqttCmdMessageByIds" parameterType="String">
+        delete from aqy_mqtt_cmd_message where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectAqyMqttCmdMessageByMsgId" resultMap="AqyMqttCmdMessageResult">
+        <include refid="selectAqyMqttCmdMessageVo"/>
+        where msg_id = #{msgId} and cmd_type = #{cmd} order by create_time desc limit 1
+    </select>
+</mapper>

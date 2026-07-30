@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mapper.AqyEquipmentTargetMapper">
+    
+    <resultMap type="AqyEquipmentTarget" id="AqyEquipmentTargetResult">
+        <result property="id"    column="id"    />
+        <result property="equipmentId"    column="equipment_id"    />
+        <result property="measitemId"    column="measitem_id"    />
+        <result property="targetName"    column="target_name"    />
+    </resultMap>
+
+    <sql id="selectAqyEquipmentTargetVo">
+        select id, equipment_id, measitem_id, target_name from aqy_equipment_target
+    </sql>
+
+    <select id="selectAqyEquipmentTargetList" parameterType="AqyEquipmentTarget" resultMap="AqyEquipmentTargetResult">
+        <include refid="selectAqyEquipmentTargetVo"/>
+        <where>  
+            <if test="equipmentId != null "> and equipment_id = #{equipmentId}</if>
+            <if test="measitemId != null "> and measitem_id = #{measitemId}</if>
+            <if test="targetName != null  and targetName != ''"> and target_name like concat('%', #{targetName}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectAqyEquipmentTargetById" parameterType="Long" resultMap="AqyEquipmentTargetResult">
+        <include refid="selectAqyEquipmentTargetVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertAqyEquipmentTarget" parameterType="AqyEquipmentTarget" useGeneratedKeys="true" keyProperty="id">
+        insert into aqy_equipment_target
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="equipmentId != null">equipment_id,</if>
+            <if test="measitemId != null">measitem_id,</if>
+            <if test="targetName != null">target_name,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="equipmentId != null">#{equipmentId},</if>
+            <if test="measitemId != null">#{measitemId},</if>
+            <if test="targetName != null">#{targetName},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAqyEquipmentTarget" parameterType="AqyEquipmentTarget">
+        update aqy_equipment_target
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="equipmentId != null">equipment_id = #{equipmentId},</if>
+            <if test="measitemId != null">measitem_id = #{measitemId},</if>
+            <if test="targetName != null">target_name = #{targetName},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAqyEquipmentTargetById" parameterType="Long">
+        delete from aqy_equipment_target where id = #{id}
+    </delete>
+
+    <delete id="deleteAqyEquipmentTargetByIds" parameterType="String">
+        delete from aqy_equipment_target where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mapper.AqyAlarmPersonMapper">
+    
+    <resultMap type="AqyAlarmPerson" id="AqyAlarmPersonResult">
+        <result property="id"    column="id"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="alarmLevel"    column="alarm_level"    />
+        <result property="contactPerson"    column="contact_person"    />
+        <result property="contactPersonNumber"    column="contact_person_number"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createUid"    column="create_uid"    />
+        <result property="isDelete"    column="is_delete"    />
+    </resultMap>
+
+    <sql id="selectAqyAlarmPersonVo">
+        select id, project_id, alarm_level, contact_person, contact_person_number, create_time, create_uid, is_delete from aqy_alarm_person
+    </sql>
+
+    <select id="selectAqyAlarmPersonList" parameterType="AqyAlarmPerson" resultMap="AqyAlarmPersonResult">
+        <include refid="selectAqyAlarmPersonVo"/>
+        <where>  
+            <if test="projectId != null "> and project_id = #{projectId}</if>
+            <if test="alarmLevel != null "> and alarm_level = #{alarmLevel}</if>
+            <if test="contactPerson != null  and contactPerson != ''"> and contact_person = #{contactPerson}</if>
+            <if test="contactPersonNumber != null  and contactPersonNumber != ''"> and contact_person_number = #{contactPersonNumber}</if>
+            <if test="createUid != null "> and create_uid = #{createUid}</if>
+            <if test="isDelete != null "> and is_delete = #{isDelete}</if>
+        </where>
+    </select>
+    
+    <select id="selectAqyAlarmPersonById" parameterType="Long" resultMap="AqyAlarmPersonResult">
+        <include refid="selectAqyAlarmPersonVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertAqyAlarmPerson" parameterType="AqyAlarmPerson" useGeneratedKeys="true" keyProperty="id">
+        insert into aqy_alarm_person
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">project_id,</if>
+            <if test="alarmLevel != null">alarm_level,</if>
+            <if test="contactPerson != null">contact_person,</if>
+            <if test="contactPersonNumber != null">contact_person_number,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createUid != null">create_uid,</if>
+            <if test="isDelete != null">is_delete,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">#{projectId},</if>
+            <if test="alarmLevel != null">#{alarmLevel},</if>
+            <if test="contactPerson != null">#{contactPerson},</if>
+            <if test="contactPersonNumber != null">#{contactPersonNumber},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createUid != null">#{createUid},</if>
+            <if test="isDelete != null">#{isDelete},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAqyAlarmPerson" parameterType="AqyAlarmPerson">
+        update aqy_alarm_person
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="alarmLevel != null">alarm_level = #{alarmLevel},</if>
+            <if test="contactPerson != null">contact_person = #{contactPerson},</if>
+            <if test="contactPersonNumber != null">contact_person_number = #{contactPersonNumber},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUid != null">create_uid = #{createUid},</if>
+            <if test="isDelete != null">is_delete = #{isDelete},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAqyAlarmPersonById" parameterType="Long">
+        delete from aqy_alarm_person where id = #{id}
+    </delete>
+
+    <delete id="deleteAqyAlarmPersonByIds" parameterType="String">
+        delete from aqy_alarm_person where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

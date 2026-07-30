@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mapper.AqyEquipmentMapper">
+
+    <resultMap type="AqyEquipment" id="AqyEquipmentResult">
+        <result property="id"    column="id"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="gatwayId"    column="gatway_id"    />
+        <result property="eqmtTypeId"    column="eqmt_type_id"    />
+        <result property="eqmtName"    column="eqmt_name"    />
+        <result property="eqmtCode"    column="eqmt_code"    />
+        <result property="sortNum"    column="sort_num"    />
+        <result property="longitude"    column="longitude"    />
+        <result property="latitude"    column="latitude"    />
+        <result property="elevation"    column="elevation"    />
+        <result property="azimuthAngle"    column="azimuth_angle"    />
+        <result property="initialX"    column="initial_x"    />
+        <result property="initialY"    column="initial_y"    />
+        <result property="initialH"    column="initial_h"    />
+        <result property="accumulativeChangeValueX"    column="accumulative_change_value_x"    />
+        <result property="accumulativeChangeValueY"    column="accumulative_change_value_y"    />
+        <result property="accumulativeChangeValueH"    column="accumulative_change_value_h"    />
+        <result property="instantChangeValue"    column="instant_change_value"    />
+        <result property="unitName"    column="unit_name"    />
+        <result property="alarmLevel"    column="alarm_level"    />
+        <result property="onlineStatus"    column="online_status"    />
+        <result property="remark"    column="remark"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createUid"    column="create_uid"    />
+        <result property="isDelete"    column="is_delete"    />
+        <result property="canCatchImage"    column="can_catch_image"    />
+        <result property="visualEqmtName"    column="visual_eqmt_name"    />
+        <result property="visualEqmtCode"    column="visual_eqmt_code"    />
+        <result property="xOrY"    column="x_or_y"    />
+        <result property="qrtzJobId"    column="qrtz_job_id"    />
+        <association property="eqmtTypeData" column="eqmt_type_id" select="com.ruoyi.mapper.AqyEquipmentTypeMapper.selectAqyEquipmentTypeById" />
+        <association property="eqmtFileList" column="id" select="com.ruoyi.mapper.AqyEquipmentFileMapper.selectAqyEquipmentFileByEqmtId" />
+    </resultMap>
+
+    <resultMap type="AqyEqmtAlarmVo" id="AqyEqmtAlarmVoResult">
+        <result property="eqmtTypeId"    column="eqmt_type_id"    />
+        <result property="eqmtTypeName"    column="eqmt_type_name"    />
+        <result property="maxAlarmLevel"    column="max_alarm_level"    />
+        <result property="id"    column="id"    />
+        <result property="eqmtName"    column="eqmt_name"    />
+        <result property="onlineStatus"    column="online_status"    />
+        <result property="alarmLevel"    column="alarm_level"    />
+    </resultMap>
+
+    <sql id="selectAqyEquipmentVo">
+        select id, project_id, gatway_id, eqmt_type_id, eqmt_name, eqmt_code, sort_num, longitude,
+               latitude, elevation, azimuth_angle, initial_x, initial_y, initial_h,
+               accumulative_change_value_x, accumulative_change_value_y, accumulative_change_value_h,
+               instant_change_value, unit_name, alarm_level, online_status,
+               remark, create_time, create_uid, is_delete, can_catch_image, visual_eqmt_name, visual_eqmt_code,
+               x_or_y, qrtz_job_id
+        from aqy_equipment
+    </sql>
+
+    <select id="selectAqyEquipmentList" parameterType="AqyEquipment" resultMap="AqyEquipmentResult">
+        <include refid="selectAqyEquipmentVo"/>
+        <where>
+            <if test="projectId != null "> and project_id = #{projectId}</if>
+            <if test="gatwayId != null "> and gatway_id = #{gatwayId}</if>
+            <if test="eqmtTypeId != null "> and eqmt_type_id = #{eqmtTypeId}</if>
+            <if test="eqmtName != null  and eqmtName != ''"> and eqmt_name like concat('%', #{eqmtName}, '%')</if>
+            <if test="eqmtCode != null  and eqmtCode != ''"> and eqmt_code = #{eqmtCode}</if>
+            <if test="longitude != null "> and longitude = #{longitude}</if>
+            <if test="latitude != null "> and latitude = #{latitude}</if>
+            <if test="elevation != null "> and elevation = #{elevation}</if>
+            <if test="azimuthAngle != null "> and azimuth_angle = #{azimuthAngle}</if>
+            <if test="initialX != null "> and initial_x = #{initialX}</if>
+            <if test="initialY != null "> and initial_y = #{initialY}</if>
+            <if test="initialH != null "> and initial_h = #{initialH}</if>
+            <if test="accumulativeChangeValue != null "> and accumulative_change_value = #{accumulativeChangeValue}</if>
+            <if test="instantChangeValue != null "> and instant_change_value = #{instantChangeValue}</if>
+            <if test="alarmLevel != null "> and alarm_level = #{alarmLevel}</if>
+            <if test="onlineStatus != null "> and online_status = #{onlineStatus}</if>
+            <if test="createUid != null "> and create_uid = #{createUid}</if>
+            <if test="isDelete != null "> and is_delete = #{isDelete}</if>
+            <if test="canCatchImage != null "> and can_catch_image = #{canCatchImage}</if>
+            <if test="sortNum != null "> and sort_num = #{sortNum}</if>
+            <if test="xOrY != null ">and x_or_y = #{xOrY}</if>
+            <if test="qrtzJobId != null ">and qrtz_job_id = #{qrtzJobId}</if>
+        </where>
+    </select>
+
+    <select id="selectAqyEquipmentListByEqmtTypeId" resultMap="AqyEquipmentResult">
+        <include refid="selectAqyEquipmentVo"/>
+        where  eqmt_type_id = #{eqmtTypeId}
+    </select>
+
+    <select id="selectAqyEquipmentById" parameterType="Long" resultMap="AqyEquipmentResult">
+        <include refid="selectAqyEquipmentVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertAqyEquipment" parameterType="AqyEquipment" useGeneratedKeys="true" keyProperty="id">
+        insert into aqy_equipment
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">project_id,</if>
+            <if test="gatwayId != null">gatway_id,</if>
+            <if test="eqmtTypeId != null">eqmt_type_id,</if>
+            <if test="eqmtName != null">eqmt_name,</if>
+            <if test="eqmtCode != null and eqmtCode != ''">eqmt_code,</if>
+            <if test="sortNum != null">sort_num,</if>
+            <if test="longitude != null">longitude,</if>
+            <if test="latitude != null">latitude,</if>
+            <if test="elevation != null">elevation,</if>
+            <if test="azimuthAngle != null">azimuth_angle,</if>
+            <if test="initialX != null">initial_x,</if>
+            <if test="initialY != null">initial_y,</if>
+            <if test="initialH != null">initial_h,</if>
+            <if test="accumulativeChangeValueX != null">accumulative_change_value_x,</if>
+            <if test="accumulativeChangeValueY != null">accumulative_change_value_y,</if>
+            <if test="accumulativeChangeValueH != null">accumulative_change_value_h,</if>
+            <if test="instantChangeValue != null">instant_change_value,</if>
+            <if test="unitName != null">unit_name,</if>
+            <if test="alarmLevel != null">alarm_level,</if>
+            <if test="onlineStatus != null">online_status,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createUid != null">create_uid,</if>
+            <if test="isDelete != null">is_delete,</if>
+            <if test="canCatchImage != null">can_catch_image,</if>
+            <if test="visualEqmtName != null">visual_eqmt_name,</if>
+            <if test="visualEqmtCode != null">visual_eqmt_code,</if>
+            <if test="xOrY != null">x_or_y,</if>
+            <if test="qrtzJobId != null">qrtz_job_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">#{projectId},</if>
+            <if test="gatwayId != null">#{gatwayId},</if>
+            <if test="eqmtTypeId != null">#{eqmtTypeId},</if>
+            <if test="eqmtName != null">#{eqmtName},</if>
+            <if test="eqmtCode != null and eqmtCode != ''">#{eqmtCode},</if>
+            <if test="sortNum != null">#{sortNum},</if>
+            <if test="longitude != null">#{longitude},</if>
+            <if test="latitude != null">#{latitude},</if>
+            <if test="elevation != null">#{elevation},</if>
+            <if test="azimuthAngle != null">#{azimuthAngle},</if>
+            <if test="initialX != null">#{initialX},</if>
+            <if test="initialY != null">#{initialY},</if>
+            <if test="initialH != null">#{initialH},</if>
+            <if test="accumulativeChangeValueX != null">#{accumulativeChangeValueX},</if>
+            <if test="accumulativeChangeValueY != null">#{accumulativeChangeValueY},</if>
+            <if test="accumulativeChangeValueH != null">#{accumulativeChangeValueH},</if>
+            <if test="instantChangeValue != null">#{instantChangeValue},</if>
+            <if test="unitName != null">#{unitName},</if>
+            <if test="alarmLevel != null">#{alarmLevel},</if>
+            <if test="onlineStatus != null">#{onlineStatus},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createUid != null">#{createUid},</if>
+            <if test="isDelete != null">#{isDelete},</if>
+            <if test="canCatchImage != null">#{canCatchImage},</if>
+            <if test="visualEqmtName != null">#{visualEqmtName},</if>
+            <if test="visualEqmtCode != null">#{visualEqmtCode},</if>
+            <if test="xOrY != null">#{xOrY},</if>
+            <if test="qrtzJobId != null">#{qrtzJobId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAqyEquipment" parameterType="AqyEquipment">
+        update aqy_equipment
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="gatwayId != null">gatway_id = #{gatwayId},</if>
+            <if test="eqmtTypeId != null">eqmt_type_id = #{eqmtTypeId},</if>
+            <if test="eqmtName != null">eqmt_name = #{eqmtName},</if>
+            <if test="eqmtCode != null and eqmtCode != ''">eqmt_code = #{eqmtCode},</if>
+            <if test="sortNum != null">sort_num = #{sortNum},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="latitude != null">latitude = #{latitude},</if>
+            <if test="elevation != null">elevation = #{elevation},</if>
+            <if test="azimuthAngle != null">azimuth_angle = #{azimuthAngle},</if>
+            <if test="initialX != null">initial_x = #{initialX},</if>
+            <if test="initialY != null">initial_y = #{initialY},</if>
+            <if test="initialH != null">initial_h = #{initialH},</if>
+            <if test="accumulativeChangeValueX != null">accumulative_change_value_x = #{accumulativeChangeValueX},</if>
+            <if test="accumulativeChangeValueY != null">accumulative_change_value_y = #{accumulativeChangeValueY},</if>
+            <if test="accumulativeChangeValueH != null">accumulative_change_value_h = #{accumulativeChangeValueH},</if>
+            <if test="instantChangeValue != null">instant_change_value = #{instantChangeValue},</if>
+            <if test="unitName != null">unit_name = #{unitName},</if>
+            <if test="alarmLevel != null">alarm_level = #{alarmLevel},</if>
+            <if test="onlineStatus != null">online_status = #{onlineStatus},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUid != null">create_uid = #{createUid},</if>
+            <if test="isDelete != null">is_delete = #{isDelete},</if>
+            <if test="canCatchImage != null">can_catch_image = #{canCatchImage},</if>
+            <if test="visualEqmtName != null">visual_eqmt_name = #{visualEqmtName},</if>
+            <if test="visualEqmtCode != null">visual_eqmt_code = #{visualEqmtCode},</if>
+            <if test="xOrY != null">x_or_y = #{xOrY},</if>
+            <if test="qrtzJobId != null">qrtz_job_id = #{qrtzJobId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAqyEquipmentById" parameterType="Long">
+        delete from aqy_equipment where id = #{id}
+    </delete>
+
+    <delete id="deleteAqyEquipmentByIds" parameterType="String">
+        delete from aqy_equipment where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectAqyEquipmentByCode" resultMap="AqyEquipmentResult">
+        <include refid="selectAqyEquipmentVo"/>
+        where eqmt_code = #{eqmtCode}
+    </select>
+
+    <select id="selectAqyEquipmentAlarmStatusList" parameterType="AqyEquipment" resultMap="AqyEqmtAlarmVoResult">
+        select a.eqmt_type_id, b.eqmt_type_name, MAX(IFNULL(c.alarm_level,0)) as max_alarm_level,a.eqmt_name
+        from aqy_equipment a
+                 left join aqy_equipment_type b on b.id=a.eqmt_type_id
+                 left join aqy_alarm c on c.id=a.alarm_level
+        where a.project_id=#{projectId} and a.alarm_level > 0
+        GROUP BY a.eqmt_type_id
+    </select>
+
+    <select id="selectAqyEquipmentListForReport" parameterType="AqyEquipment" resultMap="AqyEqmtAlarmVoResult">
+        select a.id,a.eqmt_name,a.online_status,b.eqmt_type_name,c.alarm_level
+        from aqy_equipment a
+        left join aqy_equipment_type b on b.id=a.eqmt_type_id
+        left join aqy_alarm c on c.id=a.alarm_level
+        where a.project_id=#{projectId} order by a.eqmt_type_id, a.sort_num
+    </select>
+
+    <select id="selectAqyEqmtsByType" parameterType="String" resultMap="AqyEquipmentResult">
+        select a.id,a.eqmt_name,a.x_or_y,a.sort_num,a.initial_x,a.initial_y,a.initial_h
+            from aqy_equipment a
+            left join aqy_equipment_type b on b.id=a.eqmt_type_id
+            where b.eqmt_type_symbol=#{eqmtType} order by a.sort_num
+    </select>
+</mapper>

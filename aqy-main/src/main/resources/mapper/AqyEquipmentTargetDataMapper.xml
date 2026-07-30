@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mapper.AqyEquipmentTargetDataMapper">
+
+    <resultMap type="AqyEquipmentTargetData" id="AqyEquipmentTargetDataResult">
+        <result property="id" column="id"/>
+        <result property="targetId" column="target_id"/>
+        <result property="measitemId" column="measitem_id"/>
+        <result property="value" column="value"/>
+        <result property="catchTime" column="catch_time"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="selectAqyEquipmentTargetDataVo">
+        select id, target_id, measitem_id, value, catch_time, create_time
+        from aqy_equipment_target_data
+    </sql>
+
+    <select id="selectAqyEquipmentTargetDataList" parameterType="AqyEquipmentTargetData"
+            resultMap="AqyEquipmentTargetDataResult">
+        <include refid="selectAqyEquipmentTargetDataVo"/>
+        <where>
+            <if test="targetId != null ">and target_id = #{targetId}</if>
+            <if test="measitemId != null ">and measitem_id = #{measitemId}</if>
+            <if test="value != null ">and value = #{value}</if>
+            <if test="catchTime != null ">and catch_time = #{catchTime}</if>
+        </where>
+    </select>
+
+    <select id="selectAqyEquipmentTargetDataById" parameterType="Long" resultMap="AqyEquipmentTargetDataResult">
+        <include refid="selectAqyEquipmentTargetDataVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertAqyEquipmentTargetData" parameterType="AqyEquipmentTargetData" useGeneratedKeys="true"
+            keyProperty="id">
+        insert into aqy_equipment_target_data
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="targetId != null">target_id,</if>
+            <if test="measitemId != null">measitem_id,</if>
+            <if test="value != null">value,</if>
+            <if test="catchTime != null">catch_time,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="targetId != null">#{targetId},</if>
+            <if test="measitemId != null">#{measitemId},</if>
+            <if test="value != null">#{value},</if>
+            <if test="catchTime != null">#{catchTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateAqyEquipmentTargetData" parameterType="AqyEquipmentTargetData">
+        update aqy_equipment_target_data
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="targetId != null">target_id = #{targetId},</if>
+            <if test="measitemId != null">measitem_id = #{measitemId},</if>
+            <if test="value != null">value = #{value},</if>
+            <if test="catchTime != null">catch_time = #{catchTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAqyEquipmentTargetDataById" parameterType="Long">
+        delete
+        from aqy_equipment_target_data
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteAqyEquipmentTargetDataByIds" parameterType="String">
+        delete from aqy_equipment_target_data where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="isCheckData" resultType="java.lang.Integer">
+        select count(1) from aqy_equipment_target_data
+        <where>
+            <if test="measItemId != null ">and measitem_id = #{measItemId}</if>
+            <if test="catchTime != null ">and catch_time = #{catchTime}</if>
+        </where>
+    </select>
+</mapper>

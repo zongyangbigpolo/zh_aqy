@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mapper.AqyEquipmentTypeMapper">
+
+    <resultMap type="AqyEquipmentType" id="AqyEquipmentTypeResult">
+        <result property="id"    column="id"    />
+        <result property="eqmtTypeName"    column="eqmt_type_name"    />
+        <result property="eqmtTypeSymbol"    column="eqmt_type_symbol"    />
+        <result property="uploadIntv"    column="upload_intv"    />
+        <result property="plusIntv"    column="plus_intv"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createUid"    column="create_uid"    />
+        <result property="isDelete"    column="is_delete"    />
+    </resultMap>
+
+    <sql id="selectAqyEquipmentTypeVo">
+        select id, eqmt_type_name, eqmt_type_symbol, upload_intv, plus_intv, create_time, create_uid, is_delete from aqy_equipment_type
+    </sql>
+
+    <select id="selectAqyEquipmentTypeList" parameterType="AqyEquipmentType" resultMap="AqyEquipmentTypeResult">
+        <include refid="selectAqyEquipmentTypeVo"/>
+        <where>
+            <if test="eqmtTypeName != null  and eqmtTypeName != ''"> and eqmt_type_name like concat('%', #{eqmtTypeName}, '%')</if>
+            <if test="uploadIntv != null "> and upload_intv = #{uploadIntv}</if>
+            <if test="eqmtTypeSymbol != null "> and eqmt_type_symbol = #{eqmtTypeSymbol}</if>
+            <if test="plusIntv != null "> and plus_intv = #{plusIntv}</if>
+            <if test="createUid != null "> and create_uid = #{createUid}</if>
+            <if test="isDelete != null "> and is_delete = #{isDelete}</if>
+        </where>
+    </select>
+
+    <select id="selectAqyEquipmentTypeById" parameterType="Long" resultMap="AqyEquipmentTypeResult">
+        <include refid="selectAqyEquipmentTypeVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertAqyEquipmentType" parameterType="AqyEquipmentType" useGeneratedKeys="true" keyProperty="id">
+        insert into aqy_equipment_type
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="eqmtTypeName != null">eqmt_type_name,</if>
+            <if test="eqmtTypeSymbol != null">eqmt_type_symbol,</if>
+            <if test="uploadIntv != null">upload_intv,</if>
+            <if test="plusIntv != null">plus_intv,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createUid != null">create_uid,</if>
+            <if test="isDelete != null">is_delete,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="eqmtTypeName != null">#{eqmtTypeName},</if>
+            <if test="eqmtTypeSymbol != null">#{eqmtTypeSymbol},</if>
+            <if test="uploadIntv != null">#{uploadIntv},</if>
+            <if test="plusIntv != null">#{plusIntv},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createUid != null">#{createUid},</if>
+            <if test="isDelete != null">#{isDelete},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAqyEquipmentType" parameterType="AqyEquipmentType">
+        update aqy_equipment_type
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="eqmtTypeName != null">eqmt_type_name = #{eqmtTypeName},</if>
+            <if test="eqmtTypeSymbol != null">eqmt_type_symbol = #{eqmtTypeSymbol},</if>
+            <if test="uploadIntv != null">upload_intv = #{uploadIntv},</if>
+            <if test="plusIntv != null">plus_intv = #{plusIntv},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUid != null">create_uid = #{createUid},</if>
+            <if test="isDelete != null">is_delete = #{isDelete},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAqyEquipmentTypeById" parameterType="Long">
+        delete from aqy_equipment_type where id = #{id}
+    </delete>
+
+    <delete id="deleteAqyEquipmentTypeByIds" parameterType="String">
+        delete from aqy_equipment_type where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectAqyEquipmentTypeBySymbol" parameterType="String" resultMap="AqyEquipmentTypeResult">
+        <include refid="selectAqyEquipmentTypeVo"/>
+        where eqmt_type_symbol = #{eqmtTypeSymbol} limit 1
+    </select>
+</mapper>

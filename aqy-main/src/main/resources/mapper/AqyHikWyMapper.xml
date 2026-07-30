@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mapper.AqyHikWyMapper">
+    
+    <resultMap type="AqyHikWy" id="AqyHikWyResult">
+        <result property="id"    column="id"    />
+        <result property="deviceAddr"    column="device_addr"    />
+        <result property="valueWyX"    column="value_wy_x"    />
+        <result property="valueWyY"    column="value_wy_y"    />
+        <result property="valueWyZ"    column="value_wy_z"    />
+        <result property="catchTime"    column="catch_time"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createUid"    column="create_uid"    />
+    </resultMap>
+
+    <sql id="selectAqyHikWyVo">
+        select id, device_addr, value_wy_x, value_wy_y, value_wy_z, catch_time, create_time, create_uid from aqy_hik_wy
+    </sql>
+
+    <select id="selectAqyHikWyList" parameterType="AqyHikWy" resultMap="AqyHikWyResult">
+        <include refid="selectAqyHikWyVo"/>
+        <where>  
+            <if test="deviceAddr != null  and deviceAddr != ''"> and device_addr = #{deviceAddr}</if>
+            <if test="valueWyX != null  and valueWyX != ''"> and value_wy_x = #{valueWyX}</if>
+            <if test="valueWyY != null  and valueWyY != ''"> and value_wy_y = #{valueWyY}</if>
+            <if test="valueWyZ != null  and valueWyZ != ''"> and value_wy_z = #{valueWyZ}</if>
+            <if test="catchTime != null "> and catch_time = #{catchTime}</if>
+            <if test="createUid != null "> and create_uid = #{createUid}</if>
+        </where>
+        order by catch_time DESC
+    </select>
+    
+    <select id="selectAqyHikWyById" parameterType="Long" resultMap="AqyHikWyResult">
+        <include refid="selectAqyHikWyVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertAqyHikWy" parameterType="AqyHikWy" useGeneratedKeys="true" keyProperty="id">
+        insert into aqy_hik_wy
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="deviceAddr != null">device_addr,</if>
+            <if test="valueWyX != null">value_wy_x,</if>
+            <if test="valueWyY != null">value_wy_y,</if>
+            <if test="valueWyZ != null">value_wy_z,</if>
+            <if test="catchTime != null">catch_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createUid != null">create_uid,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="deviceAddr != null">#{deviceAddr},</if>
+            <if test="valueWyX != null">#{valueWyX},</if>
+            <if test="valueWyY != null">#{valueWyY},</if>
+            <if test="valueWyZ != null">#{valueWyZ},</if>
+            <if test="catchTime != null">#{catchTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createUid != null">#{createUid},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAqyHikWy" parameterType="AqyHikWy">
+        update aqy_hik_wy
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="deviceAddr != null">device_addr = #{deviceAddr},</if>
+            <if test="valueWyX != null">value_wy_x = #{valueWyX},</if>
+            <if test="valueWyY != null">value_wy_y = #{valueWyY},</if>
+            <if test="valueWyZ != null">value_wy_z = #{valueWyZ},</if>
+            <if test="catchTime != null">catch_time = #{catchTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUid != null">create_uid = #{createUid},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAqyHikWyById" parameterType="Long">
+        delete from aqy_hik_wy where id = #{id}
+    </delete>
+
+    <delete id="deleteAqyHikWyByIds" parameterType="String">
+        delete from aqy_hik_wy where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

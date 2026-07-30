@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mapper.AqyAlarmRecordMapper">
+
+    <resultMap type="AqyAlarmRecord" id="AqyAlarmRecordResult">
+        <result property="id"    column="id"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="qmtId"    column="qmt_id"    />
+        <result property="eqmtName"    column="eqmt_name"    />
+        <result property="alarmId"    column="alarm_id"    />
+        <result property="alarmLevel"    column="alarm_level"    />
+        <result property="instantValue"    column="instant_value"    />
+        <result property="accumulativeValue1"    column="accumulative_value1"    />
+        <result property="accumulativeValue2"    column="accumulative_value2"    />
+        <result property="accumulativeValue3"    column="accumulative_value3"    />
+        <result property="alarmColor"    column="alarm_color"    />
+        <result property="alarmContent"    column="alarm_content"    />
+        <result property="recordTime"    column="record_time"    />
+        <result property="remedialMeasures"    column="remedial_measures"    />
+        <result property="remedialTime"    column="remedial_time"    />
+        <result property="remedialUid"    column="remedial_uid"    />
+        <result property="eqmtTypeSymbol"    column="eqmt_type_symbol"    />
+    </resultMap>
+
+    <sql id="selectAqyAlarmRecordVo">
+        select a.id, a.project_id, a.qmt_id, a.eqmt_name, a.alarm_id, a.alarm_level, a.instant_value,
+               a.accumulative_value1, a.accumulative_value2, a.accumulative_value3, a.alarm_color, a.alarm_content, a.record_time,
+               c.eqmt_type_symbol, a.remedial_measures, a.remedial_time, a.remedial_uid
+        from aqy_alarm_record a
+        left join aqy_equipment b on b.id=a.qmt_id
+        left join aqy_equipment_type c on c.id=b.eqmt_type_id
+    </sql>
+
+    <select id="selectAqyAlarmRecordList" parameterType="AqyAlarmRecord" resultMap="AqyAlarmRecordResult">
+        <include refid="selectAqyAlarmRecordVo"/>
+        <where>
+            <if test="projectId != null "> and a.project_id = #{projectId}</if>
+            <if test="qmtId != null "> and a.qmt_id = #{qmtId}</if>
+            <if test="eqmtName != null  and eqmtName != ''"> and a.eqmt_name like concat('%', #{eqmtName}, '%')</if>
+            <if test="alarmId != null "> and a.alarm_id = #{alarmId}</if>
+            <if test="alarmLevel != null "> and a.alarm_level = #{alarmLevel}</if>
+            <if test="instantValue != null "> and a.instant_value = #{instantValue}</if>
+            <if test="alarmColor != null  and alarmColor != ''"> and a.alarm_color = #{alarmColor}</if>
+            <if test="alarmContent != null  and alarmContent != ''"> and a.alarm_content = #{alarmContent}</if>
+            <if test="recordTime != null "> and a.record_time = #{recordTime}</if>
+        </where>
+        order by a.record_time desc
+    </select>
+
+    <select id="selectAqyAlarmRecordById" parameterType="Long" resultMap="AqyAlarmRecordResult">
+        <include refid="selectAqyAlarmRecordVo"/>
+        where a.id = #{id}
+    </select>
+
+    <insert id="insertAqyAlarmRecord" parameterType="AqyAlarmRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into aqy_alarm_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">project_id,</if>
+            <if test="qmtId != null">qmt_id,</if>
+            <if test="eqmtName != null">eqmt_name,</if>
+            <if test="alarmId != null">alarm_id,</if>
+            <if test="alarmLevel != null">alarm_level,</if>
+            <if test="instantValue != null">instant_value,</if>
+            <if test="accumulativeValue1 != null">accumulative_value1,</if>
+            <if test="accumulativeValue2 != null">accumulative_value2,</if>
+            <if test="accumulativeValue3 != null">accumulative_value3,</if>
+            <if test="alarmColor != null">alarm_color,</if>
+            <if test="alarmContent != null">alarm_content,</if>
+            <if test="recordTime != null">record_time,</if>
+            <if test="remedialMeasures != null">remedial_measures,</if>
+            <if test="remedialTime != null">remedial_time,</if>
+            <if test="remedialUid != null">remedial_uid,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">#{projectId},</if>
+            <if test="qmtId != null">#{qmtId},</if>
+            <if test="eqmtName != null">#{eqmtName},</if>
+            <if test="alarmId != null">#{alarmId},</if>
+            <if test="alarmLevel != null">#{alarmLevel},</if>
+            <if test="instantValue != null">#{instantValue},</if>
+            <if test="accumulativeValue1 != null">#{accumulativeValue1},</if>
+            <if test="accumulativeValue2 != null">#{accumulativeValue2},</if>
+            <if test="accumulativeValue3 != null">#{accumulativeValue3},</if>
+            <if test="alarmColor != null">#{alarmColor},</if>
+            <if test="alarmContent != null">#{alarmContent},</if>
+            <if test="recordTime != null">#{recordTime},</if>
+            <if test="remedialMeasures != null">#{remedialMeasures},</if>
+            <if test="remedialTime != null">#{remedialTime},</if>
+            <if test="remedialUid != null">#{remedialUid},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAqyAlarmRecord" parameterType="AqyAlarmRecord">
+        update aqy_alarm_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="qmtId != null">qmt_id = #{qmtId},</if>
+            <if test="eqmtName != null">eqmt_name = #{eqmtName},</if>
+            <if test="alarmId != null">alarm_id = #{alarmId},</if>
+            <if test="alarmLevel != null">alarm_level = #{alarmLevel},</if>
+            <if test="instantValue != null">instant_value = #{instantValue},</if>
+            <if test="accumulativeValue1 != null">accumulative_value1 = #{accumulativeValue1},</if>
+            <if test="accumulativeValue2 != null">accumulative_value2 = #{accumulativeValue2},</if>
+            <if test="accumulativeValue3 != null">accumulative_value3 = #{accumulativeValue3},</if>
+            <if test="alarmColor != null">alarm_color = #{alarmColor},</if>
+            <if test="alarmContent != null">alarm_content = #{alarmContent},</if>
+            <if test="recordTime != null">record_time = #{recordTime},</if>
+            <if test="remedialMeasures != null">remedial_measures = #{remedialMeasures},</if>
+            <if test="remedialTime != null">remedial_time = #{remedialTime},</if>
+            <if test="remedialUid != null">remedial_uid = #{remedialUid},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAqyAlarmRecordById" parameterType="Long">
+        delete from aqy_alarm_record where id = #{id}
+    </delete>
+
+    <delete id="deleteAqyAlarmRecordByIds" parameterType="String">
+        delete from aqy_alarm_record where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

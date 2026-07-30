@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mapper.AqyEquipmentYlRawMapper">
+
+    <resultMap type="AqyEquipmentYlRaw" id="AqyEquipmentYlRawResult">
+        <result property="id" column="id"/>
+        <result property="eqmtId" column="eqmt_id"/>
+        <result property="eqmtCode" column="eqmt_code"/>
+        <result property="eqmtName" column="eqmt_name"/>
+        <result property="catchTime" column="catch_time"/>
+        <result property="ylValue" column="yl_value"/>
+        <result property="eqmtTypeName" column="eqmt_type_name"/>
+        <result property="unitName" column="unit_name"/>
+        <result property="createTime"     column="create_time"       />
+        <result property="initialX" column="initial_x"/>
+    </resultMap>
+
+    <sql id="selectAqyEquipmentYlRawVo">
+        select id, eqmt_id, eqmt_code, eqmt_name, catch_time, yl_value, create_time
+        from aqy_equipment_yl_raw
+    </sql>
+
+    <select id="selectAqyEquipmentYlRawList" parameterType="AqyEquipmentYlRaw" resultMap="AqyEquipmentYlRawResult">
+        <include refid="selectAqyEquipmentYlRawVo"/>
+        <where>
+            <if test="eqmtId != null ">and eqmt_id = #{eqmtId}</if>
+            <if test="eqmtCode != null  and eqmtCode != ''">and eqmt_code = #{eqmtCode}</if>
+            <if test="eqmtName != null  and eqmtName != ''">and eqmt_name like concat('%', #{eqmtName}, '%')</if>
+            <if test="catchTime != null ">and catch_time = #{catchTime}</if>
+            <if test="ylValue != null ">and yl_value = #{ylValue}</if>
+        </where>
+        order by catch_time desc
+    </select>
+
+    <select id="selectAqyEquipmentYlRawById" parameterType="Long" resultMap="AqyEquipmentYlRawResult">
+        <include refid="selectAqyEquipmentYlRawVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertAqyEquipmentYlRaw" parameterType="AqyEquipmentYlRaw" useGeneratedKeys="true" keyProperty="id">
+        insert into aqy_equipment_yl_raw
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="eqmtId != null">eqmt_id,</if>
+            <if test="eqmtCode != null">eqmt_code,</if>
+            <if test="eqmtName != null">eqmt_name,</if>
+            <if test="catchTime != null">catch_time,</if>
+            <if test="ylValue != null">yl_value,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="eqmtId != null">#{eqmtId},</if>
+            <if test="eqmtCode != null">#{eqmtCode},</if>
+            <if test="eqmtName != null">#{eqmtName},</if>
+            <if test="catchTime != null">#{catchTime},</if>
+            <if test="ylValue != null">#{ylValue},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateAqyEquipmentYlRaw" parameterType="AqyEquipmentYlRaw">
+        update aqy_equipment_yl_raw
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="eqmtId != null">eqmt_id = #{eqmtId},</if>
+            <if test="eqmtCode != null">eqmt_code = #{eqmtCode},</if>
+            <if test="eqmtName != null">eqmt_name = #{eqmtName},</if>
+            <if test="catchTime != null">catch_time = #{catchTime},</if>
+            <if test="ylValue != null">yl_value = #{ylValue},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAqyEquipmentYlRawById" parameterType="Long">
+        delete
+        from aqy_equipment_yl_raw
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteAqyEquipmentYlRawByIds" parameterType="String">
+        delete from aqy_equipment_yl_raw where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectYlRawListForReport" parameterType="AqyRawReport" resultMap="AqyEquipmentYlRawResult">
+        select a.id, a.eqmt_id, a.eqmt_code, a.eqmt_name, a.catch_time, a.yl_value, c.eqmt_type_name, b.initial_x
+        from aqy_equipment_yl_raw a
+        left join aqy_equipment b on b.id=a.eqmt_id
+        left join aqy_equipment_type c on c.id=b.eqmt_type_id
+        <where>
+            <if test="projectId != null ">and b.project_id = #{projectId}</if>
+            <if test="eqmtTypeId != null ">and b.eqmt_type_id = #{eqmtTypeId}</if>
+            <if test="eqmtCode != null  and eqmtCode != ''">and b.eqmt_code = #{eqmtCode}</if>
+            <if test="eqmtIds != null ">
+                and a.eqmt_id in
+                <foreach item="eqmtId" collection="eqmtIds" open="(" separator="," close=")">
+                    #{eqmtId}
+                </foreach>
+            </if>
+            <if test="eqmtName != null  and eqmtName != ''">and b.eqmt_name like concat('%', #{eqmtName}, '%')</if>
+            <if test="startTime != null ">and a.catch_time BETWEEN #{startTime} and #{endTime}</if>
+            <!--            <if test="timeFrame!=null and timeFrame.length>0">-->
+            <!--                and a.catch_time BETWEEN #{timeFrame.[0]} and #{timeFrame.[1]}-->
+            <!--            </if>-->
+        </where>
+        order by a.catch_time DESC
+    </select>
+
+    <select id="listRawForCharts" parameterType="AqyEquipmentYlRaw" resultMap="AqyEquipmentYlRawResult">
+        <include refid="selectAqyEquipmentYlRawVo"/>
+        where eqmt_id = #{eqmtId} order by catch_time desc limit 10
+    </select>
+
+    <select id="selectLastLimitData" parameterType="AqyEquipmentYlRaw" resultMap="AqyEquipmentYlRawResult">
+        <include refid="selectAqyEquipmentYlRawVo"/>
+        order by catch_time desc limit #{limit}
+    </select>
+</mapper>

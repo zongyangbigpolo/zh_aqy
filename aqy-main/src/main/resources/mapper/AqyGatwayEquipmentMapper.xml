@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mapper.AqyGatwayEquipmentMapper">
+    
+    <resultMap type="AqyGatwayEquipment" id="AqyGatwayEquipmentResult">
+        <result property="id"    column="id"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="gatwayName"    column="gatway_name"    />
+        <result property="gatwayCode"    column="gatway_code"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createUid"    column="create_uid"    />
+        <result property="isDelete"    column="is_delete"    />
+        <result property="longitude"    column="longitude"    />
+        <result property="latitude"    column="latitude"    />
+    </resultMap>
+
+    <sql id="selectAqyGatwayEquipmentVo">
+        select id, project_id, gatway_name, gatway_code, create_time, create_uid, is_delete, longitude,
+               latitude
+        from aqy_gatway_equipment
+    </sql>
+
+    <select id="selectAqyGatwayEquipmentList" parameterType="AqyGatwayEquipment" resultMap="AqyGatwayEquipmentResult">
+        <include refid="selectAqyGatwayEquipmentVo"/>
+        <where>  
+            <if test="projectId != null "> and project_id = #{projectId}</if>
+            <if test="gatwayName != null  and gatwayName != ''"> and gatway_name like concat('%', #{gatwayName}, '%')</if>
+            <if test="gatwayCode != null  and gatwayCode != ''"> and gatway_code = #{gatwayCode}</if>
+            <if test="createUid != null "> and create_uid = #{createUid}</if>
+            <if test="isDelete != null "> and is_delete = #{isDelete}</if>
+        </where>
+    </select>
+    
+    <select id="selectAqyGatwayEquipmentById" parameterType="Long" resultMap="AqyGatwayEquipmentResult">
+        <include refid="selectAqyGatwayEquipmentVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectAqyGatwayEquipmentByGatwayId" parameterType="Long" resultMap="AqyGatwayEquipmentResult">
+        <include refid="selectAqyGatwayEquipmentVo"/>
+        where id = #{gatwayId}
+    </select>
+    <insert id="insertAqyGatwayEquipment" parameterType="AqyGatwayEquipment" useGeneratedKeys="true" keyProperty="id">
+        insert into aqy_gatway_equipment
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">project_id,</if>
+            <if test="gatwayName != null">gatway_name,</if>
+            <if test="gatwayCode != null">gatway_code,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createUid != null">create_uid,</if>
+            <if test="isDelete != null">is_delete,</if>
+            <if test="longitude != null">longitude,</if>
+            <if test="latitude != null">latitude,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">#{projectId},</if>
+            <if test="gatwayName != null">#{gatwayName},</if>
+            <if test="gatwayCode != null">#{gatwayCode},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createUid != null">#{createUid},</if>
+            <if test="isDelete != null">#{isDelete},</if>
+            <if test="longitude != null">#{longitude},</if>
+            <if test="latitude != null">#{latitude},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAqyGatwayEquipment" parameterType="AqyGatwayEquipment">
+        update aqy_gatway_equipment
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="gatwayName != null">gatway_name = #{gatwayName},</if>
+            <if test="gatwayCode != null">gatway_code = #{gatwayCode},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUid != null">create_uid = #{createUid},</if>
+            <if test="isDelete != null">is_delete = #{isDelete},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="latitude != null">latitude = #{latitude},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAqyGatwayEquipmentById" parameterType="Long">
+        delete from aqy_gatway_equipment where id = #{id}
+    </delete>
+
+    <delete id="deleteAqyGatwayEquipmentByIds" parameterType="String">
+        delete from aqy_gatway_equipment where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

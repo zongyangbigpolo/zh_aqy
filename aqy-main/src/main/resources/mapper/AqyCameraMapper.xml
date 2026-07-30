@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mapper.AqyCameraMapper">
+
+    <resultMap type="AqyCamera" id="AqyCameraResult">
+        <result property="id"    column="id"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="eqmtName"    column="eqmt_name"    />
+        <result property="qmtCode"    column="qmt_code"    />
+        <result property="ip"    column="ip"    />
+        <result property="port"    column="port"    />
+        <result property="userName"    column="user_name"    />
+        <result property="password"    column="password"    />
+        <result property="showFront"    column="show_front"    />
+        <result property="onlineStatus"    column="online_status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createUid"    column="create_uid"    />
+        <result property="isDelete"    column="is_delete"    />
+        <result property="appKey"    column="app_key"    />
+        <result property="secret"    column="secret"    />
+        <result property="deviceSerial"    column="device_serial"    />
+        <result property="deviceCode"    column="device_code"    />
+        <result property="cameraUrl"    column="camera_url"    />
+        <result property="type"    column="type"    />
+        <result property="accessToken"    column="access_token"    />
+    </resultMap>
+
+    <sql id="selectAqyCameraVo">
+        select id, project_id, eqmt_name, qmt_code, ip, port, user_name, password, show_front, online_status, create_time, create_uid, is_delete, app_key, secret, device_serial, device_code, camera_url, type, access_token from aqy_camera
+    </sql>
+
+    <select id="selectAqyCameraList" parameterType="AqyCamera" resultMap="AqyCameraResult">
+        <include refid="selectAqyCameraVo"/>
+        <where>
+            <if test="projectId != null "> and project_id = #{projectId}</if>
+            <if test="eqmtName != null  and eqmtName != ''"> and eqmt_name like concat('%', #{eqmtName}, '%')</if>
+            <if test="qmtCode != null  and qmtCode != ''"> and qmt_code = #{qmtCode}</if>
+            <if test="ip != null  and ip != ''"> and ip = #{ip}</if>
+            <if test="port != null "> and port = #{port}</if>
+            <if test="userName != null  and userName != ''"> and user_name like concat('%', #{userName}, '%')</if>
+            <if test="password != null  and password != ''"> and password = #{password}</if>
+            <if test="showFront != null "> and show_front = #{showFront}</if>
+            <if test="onlineStatus != null "> and online_status = #{onlineStatus}</if>
+            <if test="createUid != null "> and create_uid = #{createUid}</if>
+            <if test="isDelete != null "> and is_delete = #{isDelete}</if>
+            <if test="appKey != null  and appKey != ''"> and app_key = #{appKey}</if>
+            <if test="secret != null  and secret != ''"> and secret = #{secret}</if>
+            <if test="deviceSerial != null  and deviceSerial != ''"> and device_serial = #{deviceSerial}</if>
+            <if test="deviceCode != null  and deviceCode != ''"> and device_code = #{deviceCode}</if>
+            <if test="cameraUrl != null  and cameraUrl != ''"> and camera_url = #{cameraUrl}</if>
+            <if test="type != null "> and type = #{type}</if>
+            <if test="accessToken != null  and accessToken != ''"> and access_token = #{accessToken}</if>
+        </where>
+    </select>
+
+    <select id="selectAqyCameraById" parameterType="Long" resultMap="AqyCameraResult">
+        <include refid="selectAqyCameraVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertAqyCamera" parameterType="AqyCamera" useGeneratedKeys="true" keyProperty="id">
+        insert into aqy_camera
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">project_id,</if>
+            <if test="eqmtName != null">eqmt_name,</if>
+            <if test="qmtCode != null">qmt_code,</if>
+            <if test="ip != null">ip,</if>
+            <if test="port != null">port,</if>
+            <if test="userName != null">user_name,</if>
+            <if test="password != null">password,</if>
+            <if test="showFront != null">show_front,</if>
+            <if test="onlineStatus != null">online_status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createUid != null">create_uid,</if>
+            <if test="isDelete != null">is_delete,</if>
+            <if test="appKey != null">app_key,</if>
+            <if test="secret != null">secret,</if>
+            <if test="deviceSerial != null">device_serial,</if>
+            <if test="deviceCode != null">device_code,</if>
+            <if test="cameraUrl != null">camera_url,</if>
+            <if test="type != null">type,</if>
+            <if test="accessToken != null">access_token,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="projectId != null">#{projectId},</if>
+            <if test="eqmtName != null">#{eqmtName},</if>
+            <if test="qmtCode != null">#{qmtCode},</if>
+            <if test="ip != null">#{ip},</if>
+            <if test="port != null">#{port},</if>
+            <if test="userName != null">#{userName},</if>
+            <if test="password != null">#{password},</if>
+            <if test="showFront != null">#{showFront},</if>
+            <if test="onlineStatus != null">#{onlineStatus},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createUid != null">#{createUid},</if>
+            <if test="isDelete != null">#{isDelete},</if>
+            <if test="appKey != null">#{appKey},</if>
+            <if test="secret != null">#{secret},</if>
+            <if test="deviceSerial != null">#{deviceSerial},</if>
+            <if test="deviceCode != null">#{deviceCode},</if>
+            <if test="cameraUrl != null">#{cameraUrl},</if>
+            <if test="type != null">#{type},</if>
+            <if test="accessToken != null">#{accessToken},</if>
+        </trim>
+    </insert>
+
+    <update id="updateAqyCamera" parameterType="AqyCamera">
+        update aqy_camera
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="eqmtName != null">eqmt_name = #{eqmtName},</if>
+            <if test="qmtCode != null">qmt_code = #{qmtCode},</if>
+            <if test="ip != null">ip = #{ip},</if>
+            <if test="port != null">port = #{port},</if>
+            <if test="userName != null">user_name = #{userName},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="showFront != null">show_front = #{showFront},</if>
+            <if test="onlineStatus != null">online_status = #{onlineStatus},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUid != null">create_uid = #{createUid},</if>
+            <if test="isDelete != null">is_delete = #{isDelete},</if>
+            <if test="appKey != null">app_key = #{appKey},</if>
+            <if test="secret != null">secret = #{secret},</if>
+            <if test="deviceSerial != null">device_serial = #{deviceSerial},</if>
+            <if test="deviceCode != null">device_code = #{deviceCode},</if>
+            <if test="cameraUrl != null">camera_url = #{cameraUrl},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="accessToken != null">access_token = #{accessToken},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAqyCameraById" parameterType="Long">
+        delete from aqy_camera where id = #{id}
+    </delete>
+
+    <delete id="deleteAqyCameraByIds" parameterType="String">
+        delete from aqy_camera where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
