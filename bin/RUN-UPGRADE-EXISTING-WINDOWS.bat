@@ -16,6 +16,8 @@ echo.
 echo Before continuing, make sure the server already has required
 echo environment variables, especially DB_URL, DB_USERNAME,
 echo DB_PASSWORD, TOKEN_SECRET, Redis, MQTT, and SMS settings.
+echo The deployment script will run a strict preflight check before
+echo replacing backend/frontend files.
 echo.
 echo Press Ctrl+C now if you have not backed up the database.
 pause

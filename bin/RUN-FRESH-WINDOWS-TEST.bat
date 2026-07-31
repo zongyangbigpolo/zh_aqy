@@ -13,6 +13,9 @@ echo DO NOT use this script to upgrade an old server with real data.
 echo For an existing old Windows server, use:
 echo   bin\RUN-UPGRADE-EXISTING-WINDOWS.bat
 echo.
+echo If Java 8, MySQL, or Redis are not installed yet, run:
+echo   bin\RUN-INSTALL-WINDOWS-PREREQS.bat
+echo.
 echo Press Ctrl+C now if this is an existing production/old server.
 pause
 

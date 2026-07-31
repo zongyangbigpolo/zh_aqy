@@ -16,6 +16,7 @@ param(
     [string]$ServiceName,
     [int]$BackendPort = 7070,
     [switch]$SkipStop,
+    [switch]$SkipPreflight,
     [switch]$StartBackend,
     [switch]$RestartNginx
 )
@@ -37,6 +38,19 @@ if (-not (Test-Path (Join-Path $FrontendDist "index.html") -PathType Leaf)) {
 
 if (-not (Test-Path $UpgradeScript -PathType Leaf)) {
     throw "Upgrade script not found: $UpgradeScript"
+}
+
+if (-not $SkipPreflight) {
+    $PreflightScript = Join-Path $PSScriptRoot "windows-preflight-check.ps1"
+    if (-not (Test-Path $PreflightScript -PathType Leaf)) {
+        throw "Preflight script not found: $PreflightScript"
+    }
+
+    $PowerShell = Get-Command powershell -ErrorAction Stop
+    & $PowerShell.Source -ExecutionPolicy Bypass -File $PreflightScript -RequireProductionConfig
+    if ($LASTEXITCODE -ne 0) {
+        throw "Preflight check failed. Fix the reported items before upgrading this server."
+    }
 }
 
 $Args = @{

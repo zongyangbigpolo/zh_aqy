@@ -445,6 +445,8 @@ aqy-ui/dist
 - 手动在 GitHub Actions 页面点击 `Run workflow`。
 - 推送 `v*` 标签，例如 `v1.0.0`，会额外创建 GitHub Release。
 
+正式交付客户时，推荐从 GitHub **Releases** 下载最新 `zh-aqy-windows-*.zip`，不要让客户去 Actions 页面找临时 artifact。
+
 构建内容：
 
 1. 使用 JDK 8 编译后端。
@@ -463,8 +465,12 @@ zh-aqy-windows-版本号
 ├── bin
 │   ├── RUN-FRESH-WINDOWS-TEST.bat
 │   ├── RUN-UPGRADE-EXISTING-WINDOWS.bat
+│   ├── RUN-CHECK-WINDOWS-ENV.bat
+│   ├── RUN-INSTALL-WINDOWS-PREREQS.bat
 │   ├── deploy-release.ps1
 │   ├── windows-fresh-test-deploy.ps1
+│   ├── windows-preflight-check.ps1
+│   ├── windows-install-prerequisites.ps1
 │   └── windows-upgrade.ps1
 ├── sql
 │   ├── ry_20240629.sql
@@ -478,8 +484,57 @@ zh-aqy-windows-版本号
 
 | 场景 | 使用脚本 | 是否初始化数据库 |
 | --- | --- | --- |
+| 检查机器和配置是否准备好 | `bin\RUN-CHECK-WINDOWS-ENV.bat` | 不会修改数据库 |
+| 帮助安装 Java 8、MySQL、Redis、可选 Nginx | `bin\RUN-INSTALL-WINDOWS-PREREQS.bat` | 不会初始化数据库 |
 | 全新 Windows 测试机、空数据库、可丢弃测试数据 | `bin\RUN-FRESH-WINDOWS-TEST.bat` | 会初始化空测试库 |
 | 已经部署过老代码、有老 MySQL 数据的 Windows 服务器 | `bin\RUN-UPGRADE-EXISTING-WINDOWS.bat` 或 `bin\deploy-release.ps1` | 不会碰数据库 |
+
+## Windows 依赖安装辅助脚本
+
+全新 Windows 测试机如果还没有安装 Java 8、MySQL、Redis，可以先双击：
+
+```text
+bin\RUN-INSTALL-WINDOWS-PREREQS.bat
+```
+
+这个脚本会尝试用 Windows 自带的 `winget` 安装依赖；如果没有 `winget`，会尝试使用 Chocolatey。默认安装：
+
+1. Java 8 JDK。
+2. MySQL Server/Client。
+3. Redis for Windows。
+4. 可选 Nginx，脚本会询问是否安装。
+
+注意：
+
+- MySQL 安装器可能需要人工设置 root 密码、端口和 Windows 服务。
+- Redis 在 Windows 上使用社区移植版本，生产环境也可以改用单独的 Linux/云 Redis。
+- 安装完成后请关闭并重新打开命令行窗口，让 `PATH` 环境变量生效。
+- 安装脚本只是辅助工具；如果公司服务器不能联网，可以手动安装这些软件，然后继续运行预检脚本。
+
+## Windows 启动前环境预检脚本
+
+部署或升级前，可以先双击：
+
+```text
+bin\RUN-CHECK-WINDOWS-ENV.bat
+```
+
+它不会修改系统，也不会连接或初始化数据库，只会检查：
+
+1. Release 包是否完整：`server\aqy-admin.jar`、`web\index.html`、SQL 文件和脚本是否存在。
+2. Java 是否可用，是否看起来是 Java 8。
+3. `mysql.exe`、Redis、可选 Nginx 是否可用。
+4. 老服务器升级需要的环境变量是否配置完整，例如：
+   - `DB_URL`
+   - `DB_USERNAME`
+   - `DB_PASSWORD`
+   - `TOKEN_SECRET`
+   - `REDIS_HOST`
+   - `REDIS_PORT`
+   - `FILE_UPLOAD_PATH`
+5. 可选业务能力配置是否完整，例如 MQTT 和阿里云短信。
+
+老服务器升级入口 `RUN-UPGRADE-EXISTING-WINDOWS.bat` 会自动执行严格预检。严格预检不通过时，脚本会停止，不会替换后端 jar 或前端文件。
 
 老服务器升级可以双击：
 
@@ -512,7 +567,7 @@ powershell -ExecutionPolicy Bypass -File .\bin\deploy-release.ps1 `
 
 ## 全新 Windows 测试机一键脚本
 
-如果是一台全新的 Windows 测试机，可以下载 GitHub Actions 生成的 `zh-aqy-windows-package`，解压后运行：
+如果是一台全新的 Windows 测试机，可以从 GitHub Releases 下载最新 `zh-aqy-windows-*.zip`，解压后运行：
 
 ```text
 双击 bin\RUN-FRESH-WINDOWS-TEST.bat
@@ -539,6 +594,15 @@ powershell -ExecutionPolicy Bypass -File .\bin\windows-fresh-test-deploy.ps1 `
 7. 生成后端复用启动脚本：`D:\aqy\server\run-backend.ps1`。
 8. 启动后端。
 9. 如果能找到 `nginx.exe`，自动生成测试用 Nginx 配置并启动前端站点。
+
+全新测试库初始化后默认管理员为：
+
+```text
+账号：admin
+临时密码：ChangeMe@123456
+```
+
+首次登录后必须立即修改管理员密码。
 
 常用参数：
 
