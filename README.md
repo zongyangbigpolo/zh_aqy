@@ -82,7 +82,7 @@ Spring Boot 后端服务（aqy-admin.jar，内置 Tomcat）
 本地构建还需要：
 
 1. Maven 3.6+。
-2. Node.js，建议使用 14.x LTS；老 Vue 2 项目不建议直接使用过新的 Node 版本。
+2. Node.js，建议使用 16.x LTS；老 Vue 2 项目不建议直接使用过新的 Node 版本。
 3. npm。
 
 ## 关键配置
@@ -179,7 +179,7 @@ npm -v
 
 - JDK 8。
 - Maven 3.6+。
-- Node.js 14.x LTS。
+- Node.js 16.x LTS。
 - Git for Windows。
 - MySQL、Redis、Nginx 或 IIS。
 
@@ -448,7 +448,7 @@ aqy-ui/dist
 构建内容：
 
 1. 使用 JDK 8 编译后端。
-2. 使用 Node.js 14 编译前端。
+2. 使用 Node.js 16 编译前端。
 3. 组装 Windows 可部署压缩包。
 4. 上传 artifact：`zh-aqy-windows-package`。
 
