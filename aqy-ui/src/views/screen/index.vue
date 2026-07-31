@@ -1136,7 +1136,6 @@ export default {
       var top = currModH > 180 ? "35%" : "13%";
       var $li = [
         "<div class='no-data' style='width:90%;position: absolute;top:" + top + ";text-align:center;color:#a59999;'>",
-        "<img src='../static/images/no-data.png' style='width:200px;height:200px;'/>",
         "<div style='font-size:16px;opacity:0.7;color:#fff;'>暂无数据</div>",
         "</div>"
       ]

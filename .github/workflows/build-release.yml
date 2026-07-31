@@ -41,10 +41,7 @@ jobs:
           {
             node -v
             npm -v
-            if ! npm ci --no-audit --no-fund; then
-              echo "npm ci failed; falling back to npm install"
-              npm install --no-audit --no-fund
-            fi
+            npm install --legacy-peer-deps --no-audit --no-fund
           } 2>&1 | tee ../frontend-build.log
 
       - name: Build frontend

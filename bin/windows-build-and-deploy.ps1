@@ -96,12 +96,7 @@ if (-not (Test-Path $BackendJar -PathType Leaf)) {
 Write-Step "Building frontend dist"
 $FrontendSourceDir = Join-Path $SourceDir "aqy-ui"
 if (-not $SkipNpmInstall) {
-    if (Test-Path (Join-Path $FrontendSourceDir "package-lock.json") -PathType Leaf) {
-        Invoke-External $Npm.Source @("ci") $FrontendSourceDir
-    }
-    else {
-        Invoke-External $Npm.Source @("install") $FrontendSourceDir
-    }
+    Invoke-External $Npm.Source @("install", "--legacy-peer-deps", "--no-audit", "--no-fund") $FrontendSourceDir
 }
 Invoke-External $Npm.Source @("run", "build:prod") $FrontendSourceDir
 $FrontendDist = Join-Path $FrontendSourceDir "dist"

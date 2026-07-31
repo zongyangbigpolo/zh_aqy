@@ -265,7 +265,7 @@ D:\source\zh_aqy\aqy-admin\target\aqy-admin.jar
 
 ```powershell
 Set-Location D:\source\zh_aqy\aqy-ui
-npm install
+npm install --legacy-peer-deps
 npm run build:prod
 ```
 
@@ -354,7 +354,7 @@ git pull --ff-only
 mvn clean package -DskipTests
 
 Set-Location D:\source\zh_aqy\aqy-ui
-npm install
+npm install --legacy-peer-deps
 npm run build:prod
 
 Set-Location D:\source\zh_aqy
@@ -391,7 +391,7 @@ java -jar aqy-admin/target/aqy-admin.jar
 
 ```bash
 cd aqy-ui
-npm install
+npm install --legacy-peer-deps
 npm run dev
 ```
 
@@ -421,7 +421,7 @@ aqy-admin/target/aqy-admin.jar
 
 ```bash
 cd aqy-ui
-npm install
+npm install --legacy-peer-deps
 npm run build:prod
 ```
 
@@ -611,7 +611,7 @@ D:\aqy
 
 1. 在开发机或服务器上拉取最新代码。
 2. 构建后端：`mvn clean package -DskipTests`。
-3. 构建前端：进入 `aqy-ui` 后执行 `npm install`、`npm run build:prod`。
+3. 构建前端：进入 `aqy-ui` 后执行 `npm install --legacy-peer-deps`、`npm run build:prod`。
 4. 在老服务器上备份 MySQL。
 5. 停止旧后端进程。
 6. 备份旧的 `aqy-admin.jar` 和旧前端静态文件。
