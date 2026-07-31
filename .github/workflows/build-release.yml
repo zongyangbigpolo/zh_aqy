@@ -34,14 +34,38 @@ jobs:
       - name: Build backend
         run: mvn -B clean package -DskipTests
 
-      - name: Build frontend
+      - name: Install frontend dependencies
         working-directory: aqy-ui
         run: |
-          node -v
-          npm -v
-          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
-          npm run build:prod
-          test -f dist/index.html
+          set -o pipefail
+          {
+            node -v
+            npm -v
+            if ! npm ci --no-audit --no-fund; then
+              echo "npm ci failed; falling back to npm install"
+              npm install --no-audit --no-fund
+            fi
+          } 2>&1 | tee ../frontend-build.log
+
+      - name: Build frontend
+        working-directory: aqy-ui
+        env:
+          CI: "false"
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        run: |
+          set -o pipefail
+          {
+            echo "NODE_OPTIONS=${NODE_OPTIONS}"
+            npm run build:prod
+            test -f dist/index.html
+          } 2>&1 | tee -a ../frontend-build.log
+
+      - name: Upload frontend build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build-log
+          path: frontend-build.log
 
       - name: Assemble Windows package
         shell: bash
