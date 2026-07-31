@@ -1,4 +1,4 @@
-name: Build Windows Release Package
+name: Build Cross-Platform Release Package
 
 permissions:
   contents: write
@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+      - feature/cross-platform-deployment
     tags:
       - "v*"
   workflow_dispatch:
@@ -74,12 +75,13 @@ jobs:
           name: frontend-build-log
           path: frontend-build.log
 
-      - name: Assemble Windows package
+      - name: Assemble cross-platform package
         shell: bash
         run: |
           set -euo pipefail
-          VERSION="${GITHUB_REF_NAME}-${GITHUB_SHA::7}"
-          PACKAGE_DIR="zh-aqy-windows-${VERSION}"
+          RAW_VERSION="${GITHUB_REF_NAME}-${GITHUB_SHA::7}"
+          VERSION="${RAW_VERSION//\//-}"
+          PACKAGE_DIR="zh-aqy-cross-platform-${VERSION}"
           mkdir -p "${PACKAGE_DIR}/server" "${PACKAGE_DIR}/web" "${PACKAGE_DIR}/bin" "${PACKAGE_DIR}/sql"
           cp aqy-admin/target/aqy-admin.jar "${PACKAGE_DIR}/server/aqy-admin.jar"
           cp -R aqy-ui/dist/. "${PACKAGE_DIR}/web/"
@@ -92,45 +94,78 @@ jobs:
           cp bin/RUN-INSTALL-WINDOWS-PREREQS.bat "${PACKAGE_DIR}/bin/RUN-INSTALL-WINDOWS-PREREQS.bat"
           cp bin/RUN-FRESH-WINDOWS-TEST.bat "${PACKAGE_DIR}/bin/RUN-FRESH-WINDOWS-TEST.bat"
           cp bin/RUN-UPGRADE-EXISTING-WINDOWS.bat "${PACKAGE_DIR}/bin/RUN-UPGRADE-EXISTING-WINDOWS.bat"
+          cp bin/unix-common.sh "${PACKAGE_DIR}/bin/unix-common.sh"
+          cp bin/unix-preflight-check.sh "${PACKAGE_DIR}/bin/unix-preflight-check.sh"
+          cp bin/unix-install-prerequisites.sh "${PACKAGE_DIR}/bin/unix-install-prerequisites.sh"
+          cp bin/unix-fresh-test-deploy.sh "${PACKAGE_DIR}/bin/unix-fresh-test-deploy.sh"
+          cp bin/unix-upgrade-existing.sh "${PACKAGE_DIR}/bin/unix-upgrade-existing.sh"
+          cp bin/RUN-UBUNTU-CHECK-ENV.sh "${PACKAGE_DIR}/bin/RUN-UBUNTU-CHECK-ENV.sh"
+          cp bin/RUN-UBUNTU-INSTALL-PREREQS.sh "${PACKAGE_DIR}/bin/RUN-UBUNTU-INSTALL-PREREQS.sh"
+          cp bin/RUN-UBUNTU-FRESH-TEST.sh "${PACKAGE_DIR}/bin/RUN-UBUNTU-FRESH-TEST.sh"
+          cp bin/RUN-UBUNTU-UPGRADE-EXISTING.sh "${PACKAGE_DIR}/bin/RUN-UBUNTU-UPGRADE-EXISTING.sh"
+          cp bin/RUN-MACOS-CHECK-ENV.command "${PACKAGE_DIR}/bin/RUN-MACOS-CHECK-ENV.command"
+          cp bin/RUN-MACOS-INSTALL-PREREQS.command "${PACKAGE_DIR}/bin/RUN-MACOS-INSTALL-PREREQS.command"
+          cp bin/RUN-MACOS-FRESH-TEST.command "${PACKAGE_DIR}/bin/RUN-MACOS-FRESH-TEST.command"
+          cp bin/RUN-MACOS-UPGRADE-EXISTING.command "${PACKAGE_DIR}/bin/RUN-MACOS-UPGRADE-EXISTING.command"
           cp sql/zh_aqy_schema.sql "${PACKAGE_DIR}/sql/zh_aqy_schema.sql"
           cp sql/ry_20240629.sql "${PACKAGE_DIR}/sql/ry_20240629.sql"
           cp sql/quartz.sql "${PACKAGE_DIR}/sql/quartz.sql"
           cp README.md "${PACKAGE_DIR}/README.md"
-          cat > "${PACKAGE_DIR}/START-HERE-WINDOWS.txt" <<'EOF'
-          Zh_AqY Windows release package
+          chmod +x "${PACKAGE_DIR}"/bin/*.sh "${PACKAGE_DIR}"/bin/*.command
+          cat > "${PACKAGE_DIR}/START-HERE.txt" <<'EOF'
+          Zh_AqY cross-platform release package
 
-          Existing-server upgrade:
+          Windows existing-server upgrade:
           1. Back up the existing MySQL database first.
           2. Extract this package to any temporary folder.
           3. Run .\bin\RUN-CHECK-WINDOWS-ENV.bat and configure any missing items.
-          4. Run:
-             powershell -ExecutionPolicy Bypass -File .\bin\deploy-release.ps1 -DeployRoot D:\aqy -StartBackend -RestartNginx
-             Or double-click:
-             .\bin\RUN-UPGRADE-EXISTING-WINDOWS.bat
+          4. Double-click .\bin\RUN-UPGRADE-EXISTING-WINDOWS.bat
 
-          Fresh Windows test machine:
+          Windows fresh test machine:
           1. Install Java 8, MySQL, Redis, and optionally nginx.
              You can double-click .\bin\RUN-INSTALL-WINDOWS-PREREQS.bat for help.
           2. Run .\bin\RUN-CHECK-WINDOWS-ENV.bat to confirm the machine is ready.
-          3. Run:
-             powershell -ExecutionPolicy Bypass -File .\bin\windows-fresh-test-deploy.ps1 -MysqlAdminUser root
-             Or double-click:
-             .\bin\RUN-FRESH-WINDOWS-TEST.bat
+          3. Double-click .\bin\RUN-FRESH-WINDOWS-TEST.bat
+
+          Ubuntu fresh test machine:
+          1. Run ./bin/RUN-UBUNTU-INSTALL-PREREQS.sh if Java 8/MySQL/Redis are missing.
+          2. Run ./bin/RUN-UBUNTU-CHECK-ENV.sh.
+          3. Run ./bin/RUN-UBUNTU-FRESH-TEST.sh.
+
+          Ubuntu existing-server upgrade:
+          1. Back up MySQL first.
+          2. Run ./bin/RUN-UBUNTU-CHECK-ENV.sh and configure missing items.
+          3. Run ./bin/RUN-UBUNTU-UPGRADE-EXISTING.sh.
+
+          macOS fresh test machine:
+          1. Double-click bin/RUN-MACOS-INSTALL-PREREQS.command if Java 8/MySQL/Redis are missing.
+          2. Double-click bin/RUN-MACOS-CHECK-ENV.command.
+          3. Double-click bin/RUN-MACOS-FRESH-TEST.command.
+
+          macOS existing test upgrade:
+          1. Back up MySQL first.
+          2. Double-click bin/RUN-MACOS-CHECK-ENV.command.
+          3. Double-click bin/RUN-MACOS-UPGRADE-EXISTING.command.
 
           Existing-server upgrade scripts do not delete, recreate, or modify your existing MySQL database.
           The fresh-test script imports initialization SQL only for empty/disposable test databases.
-          Do not run RUN-FRESH-WINDOWS-TEST.bat on an existing production/old server.
+          Do not run fresh-test scripts on an existing production/old server.
           EOF
           zip -r "${PACKAGE_DIR}.zip" "${PACKAGE_DIR}"
+          tar -czf "${PACKAGE_DIR}.tar.gz" "${PACKAGE_DIR}"
 
-      - name: Upload Windows package
+      - name: Upload cross-platform package
         uses: actions/upload-artifact@v4
         with:
-          name: zh-aqy-windows-package
-          path: zh-aqy-windows-*.zip
+          name: zh-aqy-cross-platform-package
+          path: |
+            zh-aqy-cross-platform-*.zip
+            zh-aqy-cross-platform-*.tar.gz
 
       - name: Create GitHub release for version tags
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: zh-aqy-windows-*.zip
+          files: |
+            zh-aqy-cross-platform-*.zip
+            zh-aqy-cross-platform-*.tar.gz

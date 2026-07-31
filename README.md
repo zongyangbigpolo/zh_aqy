@@ -442,52 +442,74 @@ aqy-ui/dist
 它会在以下场景自动构建：
 
 - 推送到 `main` 分支。
+- 推送到跨平台部署分支 `feature/cross-platform-deployment`。
 - 手动在 GitHub Actions 页面点击 `Run workflow`。
 - 推送 `v*` 标签，例如 `v1.0.0`，会额外创建 GitHub Release。
 
-正式交付客户时，推荐从 GitHub **Releases** 下载最新 `zh-aqy-windows-*.zip`，不要让客户去 Actions 页面找临时 artifact。
+正式交付客户时，推荐从 GitHub **Releases** 下载最新 `zh-aqy-cross-platform-*.zip` 或 `zh-aqy-cross-platform-*.tar.gz`，不要让客户去 Actions 页面找临时 artifact。
 
 构建内容：
 
 1. 使用 JDK 8 编译后端。
 2. 使用 Node.js 16 编译前端。
-3. 组装 Windows 可部署压缩包。
-4. 上传 artifact：`zh-aqy-windows-package`。
+3. 组装 Windows / Ubuntu / macOS 跨平台可部署压缩包。
+4. 上传 artifact：`zh-aqy-cross-platform-package`。
 
 压缩包结构：
 
 ```text
-zh-aqy-windows-版本号
+zh-aqy-cross-platform-版本号
 ├── server
 │   └── aqy-admin.jar
 ├── web
 │   └── 前端静态文件
 ├── bin
-│   ├── RUN-FRESH-WINDOWS-TEST.bat
-│   ├── RUN-UPGRADE-EXISTING-WINDOWS.bat
 │   ├── RUN-CHECK-WINDOWS-ENV.bat
 │   ├── RUN-INSTALL-WINDOWS-PREREQS.bat
+│   ├── RUN-FRESH-WINDOWS-TEST.bat
+│   ├── RUN-UPGRADE-EXISTING-WINDOWS.bat
+│   ├── RUN-UBUNTU-CHECK-ENV.sh
+│   ├── RUN-UBUNTU-INSTALL-PREREQS.sh
+│   ├── RUN-UBUNTU-FRESH-TEST.sh
+│   ├── RUN-UBUNTU-UPGRADE-EXISTING.sh
+│   ├── RUN-MACOS-CHECK-ENV.command
+│   ├── RUN-MACOS-INSTALL-PREREQS.command
+│   ├── RUN-MACOS-FRESH-TEST.command
+│   ├── RUN-MACOS-UPGRADE-EXISTING.command
 │   ├── deploy-release.ps1
 │   ├── windows-fresh-test-deploy.ps1
 │   ├── windows-preflight-check.ps1
 │   ├── windows-install-prerequisites.ps1
-│   └── windows-upgrade.ps1
+│   ├── windows-upgrade.ps1
+│   ├── unix-common.sh
+│   ├── unix-preflight-check.sh
+│   ├── unix-install-prerequisites.sh
+│   ├── unix-fresh-test-deploy.sh
+│   └── unix-upgrade-existing.sh
 ├── sql
 │   ├── ry_20240629.sql
 │   ├── quartz.sql
 │   └── zh_aqy_schema.sql
 ├── README.md
-└── START-HERE-WINDOWS.txt
+└── START-HERE.txt
 ```
 
-下载到 Windows 服务器后，先按场景选脚本：
+下载到服务器后，先按系统和场景选脚本：
 
-| 场景 | 使用脚本 | 是否初始化数据库 |
-| --- | --- | --- |
-| 检查机器和配置是否准备好 | `bin\RUN-CHECK-WINDOWS-ENV.bat` | 不会修改数据库 |
-| 帮助安装 Java 8、MySQL、Redis、可选 Nginx | `bin\RUN-INSTALL-WINDOWS-PREREQS.bat` | 不会初始化数据库 |
-| 全新 Windows 测试机、空数据库、可丢弃测试数据 | `bin\RUN-FRESH-WINDOWS-TEST.bat` | 会初始化空测试库 |
-| 已经部署过老代码、有老 MySQL 数据的 Windows 服务器 | `bin\RUN-UPGRADE-EXISTING-WINDOWS.bat` 或 `bin\deploy-release.ps1` | 不会碰数据库 |
+| 系统 | 场景 | 使用脚本 | 是否初始化数据库 |
+| --- | --- | --- | --- |
+| Windows | 检查机器和配置是否准备好 | `bin\RUN-CHECK-WINDOWS-ENV.bat` | 不会修改数据库 |
+| Windows | 帮助安装 Java 8、MySQL、Redis、可选 Nginx | `bin\RUN-INSTALL-WINDOWS-PREREQS.bat` | 不会初始化数据库 |
+| Windows | 全新测试机、空数据库、可丢弃测试数据 | `bin\RUN-FRESH-WINDOWS-TEST.bat` | 会初始化空测试库 |
+| Windows | 已经部署过老代码、有老 MySQL 数据的服务器 | `bin\RUN-UPGRADE-EXISTING-WINDOWS.bat` 或 `bin\deploy-release.ps1` | 不会碰数据库 |
+| Ubuntu | 检查机器和配置是否准备好 | `bin/RUN-UBUNTU-CHECK-ENV.sh` | 不会修改数据库 |
+| Ubuntu | 帮助安装 Java 8、MySQL、Redis、可选 Nginx | `bin/RUN-UBUNTU-INSTALL-PREREQS.sh` | 不会初始化数据库 |
+| Ubuntu | 全新测试机、空数据库、可丢弃测试数据 | `bin/RUN-UBUNTU-FRESH-TEST.sh` | 会初始化空测试库 |
+| Ubuntu | 已经部署过老代码、有老 MySQL 数据的服务器 | `bin/RUN-UBUNTU-UPGRADE-EXISTING.sh` | 不会碰数据库 |
+| macOS | 检查机器和配置是否准备好 | `bin/RUN-MACOS-CHECK-ENV.command` | 不会修改数据库 |
+| macOS | 帮助安装 Java 8、MySQL、Redis、可选 Nginx | `bin/RUN-MACOS-INSTALL-PREREQS.command` | 不会初始化数据库 |
+| macOS | 全新测试机、空数据库、可丢弃测试数据 | `bin/RUN-MACOS-FRESH-TEST.command` | 会初始化空测试库 |
+| macOS | 已经部署过老代码、有老 MySQL 数据的测试环境 | `bin/RUN-MACOS-UPGRADE-EXISTING.command` | 不会碰数据库 |
 
 ## Windows 依赖安装辅助脚本
 
@@ -567,7 +589,7 @@ powershell -ExecutionPolicy Bypass -File .\bin\deploy-release.ps1 `
 
 ## 全新 Windows 测试机一键脚本
 
-如果是一台全新的 Windows 测试机，可以从 GitHub Releases 下载最新 `zh-aqy-windows-*.zip`，解压后运行：
+如果是一台全新的 Windows 测试机，可以从 GitHub Releases 下载最新 `zh-aqy-cross-platform-*.zip`，解压后运行：
 
 ```text
 双击 bin\RUN-FRESH-WINDOWS-TEST.bat
@@ -631,6 +653,109 @@ powershell -ExecutionPolicy Bypass -File .\bin\windows-fresh-test-deploy.ps1 `
 - 后端健康检查：`http://127.0.0.1:7070/prod-api/captchaImage`
 - 前端地址：`http://127.0.0.1/`
 - 后续手动启动后端：右键 PowerShell 执行 `D:\aqy\server\run-backend.ps1`
+
+## Ubuntu 一键脚本
+
+Ubuntu 推荐下载 `zh-aqy-cross-platform-*.tar.gz`，也可以使用 zip 包。解压后先给脚本确认执行权限：
+
+```bash
+chmod +x bin/*.sh
+```
+
+如果机器还没有 Java 8、MySQL、Redis，可以运行：
+
+```bash
+./bin/RUN-UBUNTU-INSTALL-PREREQS.sh
+```
+
+这个脚本会使用 `apt-get` 安装依赖；如果系统默认源没有 Java 8，会尝试添加 Eclipse Temurin 8 的 apt 源。
+
+部署前预检：
+
+```bash
+./bin/RUN-UBUNTU-CHECK-ENV.sh
+```
+
+全新测试机、空数据库部署：
+
+```bash
+./bin/RUN-UBUNTU-FRESH-TEST.sh
+```
+
+老 Ubuntu 服务器升级：
+
+```bash
+./bin/RUN-UBUNTU-UPGRADE-EXISTING.sh
+```
+
+Ubuntu 脚本默认部署目录是：
+
+```text
+~/zh-aqy
+```
+
+如果要部署到生产常用目录 `/opt/zh-aqy`，可以在执行前设置：
+
+```bash
+export DEPLOY_ROOT=/opt/zh-aqy
+```
+
+全新测试部署完成后：
+
+- 后端健康检查：`http://127.0.0.1:7070/prod-api/captchaImage`
+- 前端测试地址：`http://127.0.0.1:8080/`
+- 后续手动启动后端：`~/zh-aqy/server/run-backend.sh`
+- 默认管理员：`admin / ChangeMe@123456`
+
+> Ubuntu 老服务器升级脚本会先运行严格预检。预检失败时不会替换后端 jar 或前端文件。
+
+## macOS 一键脚本
+
+macOS 主要建议用于开发、演示和测试，不建议作为客户生产服务器。下载 `zh-aqy-cross-platform-*.zip` 或 `.tar.gz` 后解压。
+
+如果缺少 Java 8、MySQL、Redis，可以双击：
+
+```text
+bin/RUN-MACOS-INSTALL-PREREQS.command
+```
+
+脚本会使用 Homebrew 安装依赖；如果没有 Homebrew，需要先安装 Homebrew。
+
+部署前预检可以双击：
+
+```text
+bin/RUN-MACOS-CHECK-ENV.command
+```
+
+全新测试机、空数据库部署可以双击：
+
+```text
+bin/RUN-MACOS-FRESH-TEST.command
+```
+
+已有 macOS 测试环境升级可以双击：
+
+```text
+bin/RUN-MACOS-UPGRADE-EXISTING.command
+```
+
+macOS 默认部署目录也是：
+
+```text
+~/zh-aqy
+```
+
+如果 macOS 提示脚本没有执行权限，可以在终端执行：
+
+```bash
+chmod +x bin/*.sh bin/*.command
+```
+
+macOS 全新测试部署完成后：
+
+- 后端健康检查：`http://127.0.0.1:7070/prod-api/captchaImage`
+- 前端测试地址：`http://127.0.0.1:8080/`
+- 默认管理员：`admin / ChangeMe@123456`
 
 ## 全新部署
 
