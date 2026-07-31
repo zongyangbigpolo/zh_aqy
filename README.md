@@ -82,7 +82,7 @@ Spring Boot 后端服务（aqy-admin.jar，内置 Tomcat）
 本地构建还需要：
 
 1. Maven 3.6+。
-2. Node.js，建议使用 16.x LTS；老 Vue 2 项目不建议直接使用过新的 Node 版本。
+2. Node.js，建议使用 22.x LTS；CI 构建会为旧 Vue CLI/Webpack 设置兼容参数。
 3. npm。
 
 ## 关键配置
@@ -179,7 +179,7 @@ npm -v
 
 - JDK 8。
 - Maven 3.6+。
-- Node.js 16.x LTS。
+- Node.js 22.x LTS。
 - Git for Windows。
 - MySQL、Redis、Nginx 或 IIS。
 
@@ -451,7 +451,7 @@ aqy-ui/dist
 构建内容：
 
 1. 使用 JDK 8 编译后端。
-2. 使用 Node.js 16 编译前端。
+2. 使用 Node.js 22 编译前端。
 3. 组装 Windows / Ubuntu / macOS 跨平台可部署压缩包。
 4. 上传 artifact：`zh-aqy-cross-platform-package`。
 
@@ -476,7 +476,12 @@ zh-aqy-cross-platform-版本号
 │   ├── RUN-MACOS-INSTALL-PREREQS.command
 │   ├── RUN-MACOS-FRESH-TEST.command
 │   ├── RUN-MACOS-UPGRADE-EXISTING.command
+│   ├── RUN-DOCKER-FRESH-TEST.bat
+│   ├── RUN-DOCKER-FRESH-TEST.sh
+│   ├── RUN-DOCKER-FRESH-TEST.command
 │   ├── deploy-release.ps1
+│   ├── docker-generate-env.ps1
+│   ├── docker-generate-env.sh
 │   ├── windows-fresh-test-deploy.ps1
 │   ├── windows-preflight-check.ps1
 │   ├── windows-install-prerequisites.ps1
@@ -490,14 +495,54 @@ zh-aqy-cross-platform-版本号
 │   ├── ry_20240629.sql
 │   ├── quartz.sql
 │   └── zh_aqy_schema.sql
+├── deploy
+│   └── docker
+│       ├── backend.Dockerfile
+│       ├── nginx.conf
+│       └── mysql-init
+├── docker-compose.yml
 ├── README.md
 └── START-HERE.txt
 ```
+
+## 推荐：Docker Compose 跨平台全新测试部署
+
+如果是全新测试机、演示机，最推荐使用 Docker Compose。它在 Windows、Ubuntu、macOS 上流程基本一致，只需要机器先安装 Docker Desktop 或 Docker Engine + Compose 插件，不需要分别手动安装 Java、MySQL、Redis、Nginx。
+
+Docker Compose 会启动：
+
+1. MySQL 8.0 容器。
+2. Redis 7 容器。
+3. 后端 `aqy-admin.jar` 容器。
+4. Nginx 前端容器。
+
+按平台运行：
+
+```text
+Windows：双击 bin\RUN-DOCKER-FRESH-TEST.bat
+Ubuntu ：执行 ./bin/RUN-DOCKER-FRESH-TEST.sh
+macOS  ：双击 bin/RUN-DOCKER-FRESH-TEST.command
+```
+
+脚本会自动生成本地 `.env` 文件，里面包含 Docker 测试环境使用的随机数据库密码和 Token 密钥。`.env` 是本机运行文件，不要提交到代码仓库。
+
+启动后访问：
+
+```text
+前端：http://127.0.0.1:8080/
+后端：http://127.0.0.1:7070/prod-api/captchaImage
+默认管理员：admin / ChangeMe@123456
+```
+
+首次登录后必须立即修改管理员密码。
+
+> Docker Compose 路径适合全新测试/演示环境。已有老数据库、老服务器升级时，仍然使用对应平台的升级脚本，避免误初始化或迁移老数据。
 
 下载到服务器后，先按系统和场景选脚本：
 
 | 系统 | 场景 | 使用脚本 | 是否初始化数据库 |
 | --- | --- | --- | --- |
+| Windows / Ubuntu / macOS | Docker Compose 全新测试/演示部署 | `RUN-DOCKER-FRESH-TEST.*` | 会初始化 Docker 内部空测试库 |
 | Windows | 检查机器和配置是否准备好 | `bin\RUN-CHECK-WINDOWS-ENV.bat` | 不会修改数据库 |
 | Windows | 帮助安装 Java 8、MySQL、Redis、可选 Nginx | `bin\RUN-INSTALL-WINDOWS-PREREQS.bat` | 不会初始化数据库 |
 | Windows | 全新测试机、空数据库、可丢弃测试数据 | `bin\RUN-FRESH-WINDOWS-TEST.bat` | 会初始化空测试库 |

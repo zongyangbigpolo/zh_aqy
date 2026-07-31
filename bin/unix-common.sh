@@ -156,6 +156,10 @@ bin/unix-preflight-check.sh
 bin/unix-install-prerequisites.sh
 bin/unix-fresh-test-deploy.sh
 bin/unix-upgrade-existing.sh
+docker-compose.yml
+deploy/docker/backend.Dockerfile
+deploy/docker/nginx.conf
+deploy/docker/mysql-init/00-import-release-sql.sh
 EOF
 }
 

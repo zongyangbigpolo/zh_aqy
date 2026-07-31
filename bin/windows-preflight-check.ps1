@@ -159,6 +159,10 @@ if (-not $SkipPackageCheck) {
         "bin\windows-preflight-check.ps1",
         "bin\windows-install-prerequisites.ps1",
         "bin\windows-fresh-test-deploy.ps1",
+        "docker-compose.yml",
+        "deploy\docker\backend.Dockerfile",
+        "deploy\docker\nginx.conf",
+        "deploy\docker\mysql-init\00-import-release-sql.sh",
         "sql\ry_20240629.sql",
         "sql\quartz.sql",
         "sql\zh_aqy_schema.sql"

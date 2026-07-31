@@ -27,10 +27,10 @@ jobs:
           java-version: "8"
           cache: maven
 
-      - name: Set up Node.js 16
+      - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: "16"
+          node-version: "22"
 
       - name: Build backend
         run: mvn -B clean package -DskipTests
@@ -49,7 +49,7 @@ jobs:
         working-directory: aqy-ui
         env:
           CI: "false"
-          NODE_OPTIONS: "--max-old-space-size=4096"
+          NODE_OPTIONS: "--max-old-space-size=4096 --openssl-legacy-provider"
         run: |
           set -o pipefail
           echo "NODE_OPTIONS=${NODE_OPTIONS}" | tee -a ../frontend-build.log
@@ -94,6 +94,11 @@ jobs:
           cp bin/RUN-INSTALL-WINDOWS-PREREQS.bat "${PACKAGE_DIR}/bin/RUN-INSTALL-WINDOWS-PREREQS.bat"
           cp bin/RUN-FRESH-WINDOWS-TEST.bat "${PACKAGE_DIR}/bin/RUN-FRESH-WINDOWS-TEST.bat"
           cp bin/RUN-UPGRADE-EXISTING-WINDOWS.bat "${PACKAGE_DIR}/bin/RUN-UPGRADE-EXISTING-WINDOWS.bat"
+          cp bin/RUN-DOCKER-FRESH-TEST.bat "${PACKAGE_DIR}/bin/RUN-DOCKER-FRESH-TEST.bat"
+          cp bin/RUN-DOCKER-FRESH-TEST.sh "${PACKAGE_DIR}/bin/RUN-DOCKER-FRESH-TEST.sh"
+          cp bin/RUN-DOCKER-FRESH-TEST.command "${PACKAGE_DIR}/bin/RUN-DOCKER-FRESH-TEST.command"
+          cp bin/docker-generate-env.sh "${PACKAGE_DIR}/bin/docker-generate-env.sh"
+          cp bin/docker-generate-env.ps1 "${PACKAGE_DIR}/bin/docker-generate-env.ps1"
           cp bin/unix-common.sh "${PACKAGE_DIR}/bin/unix-common.sh"
           cp bin/unix-preflight-check.sh "${PACKAGE_DIR}/bin/unix-preflight-check.sh"
           cp bin/unix-install-prerequisites.sh "${PACKAGE_DIR}/bin/unix-install-prerequisites.sh"
@@ -110,10 +115,23 @@ jobs:
           cp sql/zh_aqy_schema.sql "${PACKAGE_DIR}/sql/zh_aqy_schema.sql"
           cp sql/ry_20240629.sql "${PACKAGE_DIR}/sql/ry_20240629.sql"
           cp sql/quartz.sql "${PACKAGE_DIR}/sql/quartz.sql"
+          cp docker-compose.yml "${PACKAGE_DIR}/docker-compose.yml"
+          cp .dockerignore "${PACKAGE_DIR}/.dockerignore"
+          mkdir -p "${PACKAGE_DIR}/deploy"
+          cp -R deploy/docker "${PACKAGE_DIR}/deploy/docker"
           cp README.md "${PACKAGE_DIR}/README.md"
-          chmod +x "${PACKAGE_DIR}"/bin/*.sh "${PACKAGE_DIR}"/bin/*.command
+          chmod +x "${PACKAGE_DIR}"/bin/*.sh "${PACKAGE_DIR}"/bin/*.command "${PACKAGE_DIR}"/deploy/docker/mysql-init/*.sh
           cat > "${PACKAGE_DIR}/START-HERE.txt" <<'EOF'
           Zh_AqY cross-platform release package
+
+          Recommended modern fresh-test path on Windows/Ubuntu/macOS:
+          1. Install Docker Desktop or Docker Engine with Compose plugin.
+          2. Run:
+             Windows: .\bin\RUN-DOCKER-FRESH-TEST.bat
+             Ubuntu : ./bin/RUN-DOCKER-FRESH-TEST.sh
+             macOS  : double-click bin/RUN-DOCKER-FRESH-TEST.command
+          3. Open http://127.0.0.1:8080/
+          4. Login with admin / ChangeMe@123456 and change the password immediately.
 
           Windows existing-server upgrade:
           1. Back up the existing MySQL database first.

@@ -1,0 +1,96 @@
+name: zh-aqy
+
+services:
+  mysql:
+    image: mysql:8.0
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --default-time-zone=+08:00
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
+      MYSQL_DATABASE: ${DB_NAME:-zh_aqy}
+      MYSQL_USER: ${DB_USERNAME:-zh_aqy_app}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      TZ: Asia/Shanghai
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./sql:/release-sql:ro
+      - ./deploy/docker/mysql-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  backend:
+    build:
+      context: .
+      dockerfile: deploy/docker/backend.Dockerfile
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DB_URL: "jdbc:mysql://mysql:3306/${DB_NAME:-zh_aqy}?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8"
+      DB_USERNAME: ${DB_USERNAME:-zh_aqy_app}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      DRUID_LOGIN_USERNAME: ${DRUID_LOGIN_USERNAME:-admin}
+      DRUID_LOGIN_PASSWORD: ${DRUID_LOGIN_PASSWORD:?DRUID_LOGIN_PASSWORD is required}
+      TOKEN_SECRET: ${TOKEN_SECRET:?TOKEN_SECRET is required}
+      SERVER_PORT: 7070
+      SERVER_CONTEXT_PATH: /prod-api
+      RUOYI_PROFILE: /app/uploadPath
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DATABASE: 0
+      REDIS_PASSWORD: ""
+      MQTT_HOST: ${MQTT_HOST:-tcp://127.0.0.1:1883}
+      MQTT_USERNAME: ${MQTT_USERNAME:-}
+      MQTT_PASSWORD: ${MQTT_PASSWORD:-}
+      ALIYUN_SMS_ACCESS_KEY_ID: ${ALIYUN_SMS_ACCESS_KEY_ID:-}
+      ALIYUN_SMS_ACCESS_KEY_SECRET: ${ALIYUN_SMS_ACCESS_KEY_SECRET:-}
+      ALIYUN_SMS_SIGN_NAME: ${ALIYUN_SMS_SIGN_NAME:-}
+      ALIYUN_SMS_TEMPLATE_CODE: ${ALIYUN_SMS_TEMPLATE_CODE:-}
+      ALIYUN_SMS_COOLDOWN_SECONDS: ${ALIYUN_SMS_COOLDOWN_SECONDS:-600}
+      FILE_DOMAIN: "http://127.0.0.1:${WEB_PORT:-8080}"
+      FILE_UPLOAD_PATH: /app/uploadPath
+      FILE_PREFIX: /zhbg
+      TZ: Asia/Shanghai
+    volumes:
+      - upload-data:/app/uploadPath
+    ports:
+      - "${BACKEND_PORT:-7070}:7070"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:7070/prod-api/captchaImage >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+
+  web:
+    image: nginx:1.27-alpine
+    depends_on:
+      backend:
+        condition: service_started
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+      - ./deploy/docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "${WEB_PORT:-8080}:80"
+
+volumes:
+  mysql-data:
+  redis-data:
+  upload-data:
