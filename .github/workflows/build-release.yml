@@ -54,11 +54,21 @@ jobs:
           NODE_OPTIONS: "--max-old-space-size=4096"
         run: |
           set -o pipefail
-          {
-            echo "NODE_OPTIONS=${NODE_OPTIONS}"
-            npm run build:prod
-            test -f dist/index.html
-          } 2>&1 | tee -a ../frontend-build.log
+          echo "NODE_OPTIONS=${NODE_OPTIONS}" | tee -a ../frontend-build.log
+          if ! npm run build:prod 2>&1 | tee -a ../frontend-build.log; then
+            echo "::group::Frontend build log tail"
+            tail -120 ../frontend-build.log
+            echo "::endgroup::"
+            python3 - <<'PY'
+          from pathlib import Path
+          lines = Path("../frontend-build.log").read_text(errors="replace").splitlines()[-30:]
+          message = "\n".join(lines)
+          message = message.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+          print(f"::error title=Frontend build failed::{message}")
+          PY
+            exit 1
+          fi
+          test -f dist/index.html
 
       - name: Upload frontend build log
         if: failure()
