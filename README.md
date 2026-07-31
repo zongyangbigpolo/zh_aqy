@@ -526,6 +526,8 @@ macOS  ：双击 bin/RUN-DOCKER-FRESH-TEST.command
 
 脚本会自动生成本地 `.env` 文件，里面包含 Docker 测试环境使用的随机数据库密码和 Token 密钥。`.env` 是本机运行文件，不要提交到代码仓库。
 
+Docker Compose 中的 MySQL、Redis、后端、前端容器都配置了 `restart: unless-stopped`。服务器重启后，只要 Docker 服务本身已经设置为开机启动，容器会自动恢复运行；如果用户手动停止过容器，则不会被强制拉起。
+
 启动后访问：
 
 ```text
@@ -536,7 +538,7 @@ macOS  ：双击 bin/RUN-DOCKER-FRESH-TEST.command
 
 首次登录后必须立即修改管理员密码。
 
-> Docker Compose 路径适合全新测试/演示环境。已有老数据库、老服务器升级时，仍然使用对应平台的升级脚本，避免误初始化或迁移老数据。
+> Docker Compose 路径适合全新测试/演示环境。它会使用 Docker 内部 MySQL 数据卷，只在该数据卷首次创建时导入初始化 SQL，不会自动连接、迁移或升级已有老数据库。已有老数据库、老服务器升级时，仍然使用对应平台的升级脚本，并在备份后按版本要求单独执行安全的数据库升级 SQL。
 
 下载到服务器后，先按系统和场景选脚本：
 

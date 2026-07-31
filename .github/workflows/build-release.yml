@@ -132,6 +132,10 @@ jobs:
              macOS  : double-click bin/RUN-DOCKER-FRESH-TEST.command
           3. Open http://127.0.0.1:8080/
           4. Login with admin / ChangeMe@123456 and change the password immediately.
+          Note: Docker containers use restart: unless-stopped. They restart after
+          host reboot only if Docker itself starts automatically.
+          Note: This fresh-test path uses Docker's internal MySQL volume and does
+          not migrate or upgrade an existing external MySQL database.
 
           Windows existing-server upgrade:
           1. Back up the existing MySQL database first.
