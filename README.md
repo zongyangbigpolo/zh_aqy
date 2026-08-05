@@ -6,6 +6,20 @@
 
 > 当前推荐标记：`v2026.8.7-empty-data-stable-docker`。这是“空数据稳定版 / 通用 Docker 安装包”，重点修复空项目、空设备、空图表场景下首页和大屏稳定性，并默认走 Docker-first 跨平台安装。
 
+## 项目效果一览
+
+### 业务首页
+
+![业务首页](docs/screenshots/home-dashboard.png)
+
+### 设备管理
+
+![设备管理](docs/screenshots/device-management.png)
+
+### 大屏展示
+
+![大屏展示](docs/screenshots/big-screen.png)
+
 ## 核心能力
 
 - 项目、标段、设备、网关、摄像头等基础资料管理。
@@ -279,9 +293,3 @@ aqy-ui/dist
 - `sql/migrations/*.sql`：老库迁移后的增量修正脚本。
 
 新环境 fresh-test 会执行初始化 SQL。老库升级不要重复执行初始化 SQL，应使用迁移脚本。
-
-### 为什么第二阶段建议引入 Flyway
-
-Flyway 是数据库版本迁移工具。它把每次数据库结构或基础数据变更写成有版本号的 SQL，例如 `V1__init.sql`、`V2__add_alarm_index.sql`。部署时 Flyway 会检查哪些版本已经在当前数据库执行过，只执行缺失的迁移，并把执行记录写入数据库历史表。
-
-当前第一阶段仍保留 `sql/migrations/*.sql` 脚本模式，适合先把 Docker-first 部署跑稳。第二阶段引入 Flyway 的价值是让老客户数据库升级变得可追踪、可重复、可验证，避免手工 SQL 漏执行、重复执行或不同环境执行顺序不一致。
