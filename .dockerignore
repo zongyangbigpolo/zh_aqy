@@ -1,0 +1,6 @@
+*
+!server/
+!server/aqy-admin.jar
+!deploy/
+!deploy/docker/
+!deploy/docker/backend.Dockerfile
