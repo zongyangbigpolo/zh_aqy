@@ -27,11 +27,11 @@ install_ubuntu() {
 
   run_cmd sudo apt-get update
 
-  if ! java_path="$(find_java)" || ! java_is_version_8 "${java_path}"; then
-    if apt-cache show openjdk-8-jdk >/dev/null 2>&1; then
-      run_cmd sudo apt-get install -y openjdk-8-jdk
+  if ! java_path="$(find_java)" || ! java_is_version_17 "${java_path}"; then
+    if apt-cache show openjdk-17-jdk >/dev/null 2>&1; then
+      run_cmd sudo apt-get install -y openjdk-17-jdk
     else
-      log_warn "openjdk-8-jdk is not available in the default apt repository. Installing Temurin 8 via Adoptium apt repository."
+      log_warn "openjdk-17-jdk is not available in the default apt repository. Installing Temurin 17 via Adoptium apt repository."
       run_cmd sudo apt-get install -y wget apt-transport-https gpg ca-certificates
       run_cmd sudo mkdir -p /etc/apt/keyrings
       if [[ "${DRY_RUN}" != "1" ]]; then
@@ -40,10 +40,10 @@ install_ubuntu() {
         echo "deb [signed-by=/etc/apt/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb ${VERSION_CODENAME} main" | sudo tee /etc/apt/sources.list.d/adoptium.list >/dev/null
       fi
       run_cmd sudo apt-get update
-      run_cmd sudo apt-get install -y temurin-8-jdk
+      run_cmd sudo apt-get install -y temurin-17-jdk
     fi
   else
-    log_ok "Java 8 already installed: ${java_path}"
+    log_ok "Java 17 already installed: ${java_path}"
   fi
 
   if ! command -v mysql >/dev/null 2>&1; then
@@ -81,10 +81,10 @@ install_macos() {
     die "Homebrew was not found. Install Homebrew first: https://brew.sh/"
   fi
 
-  if ! java_path="$(find_java)" || ! java_is_version_8 "${java_path}"; then
-    run_cmd brew install --cask temurin8 || run_cmd brew install openjdk@8
+  if ! java_path="$(find_java)" || ! java_is_version_17 "${java_path}"; then
+    run_cmd brew install --cask temurin17 || run_cmd brew install openjdk@17
   else
-    log_ok "Java 8 already installed: ${java_path}"
+    log_ok "Java 17 already installed: ${java_path}"
   fi
 
   command -v mysql >/dev/null 2>&1 || run_cmd brew install mysql
@@ -106,7 +106,7 @@ install_macos() {
 printf '============================================================\n'
 printf 'Zh_AqY Ubuntu/macOS prerequisite installer\n'
 printf '============================================================\n'
-printf 'Required: Java 8, MySQL, Redis\n'
+printf 'Required: Java 17, MySQL, Redis\n'
 printf 'Optional: Nginx\n'
 
 case "$(detect_platform)" in

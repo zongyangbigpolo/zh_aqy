@@ -2,6 +2,10 @@ package com.ruoyi.framework.web.service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -22,6 +26,7 @@ import eu.bitwalker.useragentutils.UserAgent;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 /**
  * token验证处理
@@ -178,7 +183,7 @@ public class TokenService
     {
         String token = Jwts.builder()
                 .setClaims(claims)
-                .signWith(SignatureAlgorithm.HS512, secret).compact();
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512).compact();
         return token;
     }
 
@@ -191,9 +196,22 @@ public class TokenService
     private Claims parseToken(String token)
     {
         return Jwts.parser()
-                .setSigningKey(secret)
+                .setSigningKey(getSigningKey())
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    private Key getSigningKey()
+    {
+        try
+        {
+            byte[] digest = MessageDigest.getInstance("SHA-512").digest(secret.getBytes(StandardCharsets.UTF_8));
+            return Keys.hmacShaKeyFor(digest);
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            throw new IllegalStateException("SHA-512 algorithm is not available", e);
+        }
     }
 
     /**

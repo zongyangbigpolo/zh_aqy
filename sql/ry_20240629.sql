@@ -155,8 +155,11 @@ create table sys_menu (
 -- ----------------------------
 -- 一级菜单
 insert into sys_menu values('1', '系统管理', '0', '1', 'system',           null, '', '', 1, 0, 'M', '0', '0', '', 'system',   'admin', sysdate(), '', null, '系统管理目录');
-insert into sys_menu values('2', '系统监控', '0', '2', 'monitor',          null, '', '', 1, 0, 'M', '0', '0', '', 'monitor',  'admin', sysdate(), '', null, '系统监控目录');
-insert into sys_menu values('3', '系统工具', '0', '3', 'tool',             null, '', '', 1, 0, 'M', '0', '0', '', 'tool',     'admin', sysdate(), '', null, '系统工具目录');
+insert into sys_menu values('4', '数据看板', '0', '2', 'screen',           'screen/index', '', '', 1, 0, 'C', '0', '0', '', 'dashboard', 'admin', sysdate(), '', null, '安全云数据看板');
+insert into sys_menu values('5', '项目管理', '0', '3', 'aqyProject',       null, '', '', 1, 0, 'M', '0', '0', '', 'tree',      'admin', sysdate(), '', null, '项目与标段管理');
+insert into sys_menu values('6', '设备管理', '0', '4', 'aqyEquipment',     null, '', '', 1, 0, 'M', '0', '0', '', 'monitor',   'admin', sysdate(), '', null, '设备与网关管理');
+insert into sys_menu values('7', '告警管理', '0', '5', 'aqyAlarm',         null, '', '', 1, 0, 'M', '0', '0', '', 'message',   'admin', sysdate(), '', null, '告警规则、记录和通知管理');
+insert into sys_menu values('8', '数据报表', '0', '6', 'aqyReport',        null, '', '', 1, 0, 'M', '0', '0', '', 'chart',     'admin', sysdate(), '', null, '实时、历史和原始数据报表');
 -- 二级菜单
 insert into sys_menu values('100',  '用户管理', '1',   '1', 'user',       'system/user/index',        '', '', 1, 0, 'C', '0', '0', 'system:user:list',        'user',          'admin', sysdate(), '', null, '用户管理菜单');
 insert into sys_menu values('101',  '角色管理', '1',   '2', 'role',       'system/role/index',        '', '', 1, 0, 'C', '0', '0', 'system:role:list',        'peoples',       'admin', sysdate(), '', null, '角色管理菜单');
@@ -167,15 +170,28 @@ insert into sys_menu values('105',  '字典管理', '1',   '6', 'dict',       's
 insert into sys_menu values('106',  '参数设置', '1',   '7', 'config',     'system/config/index',      '', '', 1, 0, 'C', '0', '0', 'system:config:list',      'edit',          'admin', sysdate(), '', null, '参数设置菜单');
 insert into sys_menu values('107',  '通知公告', '1',   '8', 'notice',     'system/notice/index',      '', '', 1, 0, 'C', '0', '0', 'system:notice:list',      'message',       'admin', sysdate(), '', null, '通知公告菜单');
 insert into sys_menu values('108',  '日志管理', '1',   '9', 'log',        '',                         '', '', 1, 0, 'M', '0', '0', '',                        'log',           'admin', sysdate(), '', null, '日志管理菜单');
-insert into sys_menu values('109',  '在线用户', '2',   '1', 'online',     'monitor/online/index',     '', '', 1, 0, 'C', '0', '0', 'monitor:online:list',     'online',        'admin', sysdate(), '', null, '在线用户菜单');
-insert into sys_menu values('110',  '定时任务', '2',   '2', 'job',        'monitor/job/index',        '', '', 1, 0, 'C', '0', '0', 'monitor:job:list',        'job',           'admin', sysdate(), '', null, '定时任务菜单');
-insert into sys_menu values('111',  '数据监控', '2',   '3', 'druid',      'monitor/druid/index',      '', '', 1, 0, 'C', '0', '0', 'monitor:druid:list',      'druid',         'admin', sysdate(), '', null, '数据监控菜单');
-insert into sys_menu values('112',  '服务监控', '2',   '4', 'server',     'monitor/server/index',     '', '', 1, 0, 'C', '0', '0', 'monitor:server:list',     'server',        'admin', sysdate(), '', null, '服务监控菜单');
-insert into sys_menu values('113',  '缓存监控', '2',   '5', 'cache',      'monitor/cache/index',      '', '', 1, 0, 'C', '0', '0', 'monitor:cache:list',      'redis',         'admin', sysdate(), '', null, '缓存监控菜单');
-insert into sys_menu values('114',  '缓存列表', '2',   '6', 'cacheList',  'monitor/cache/list',       '', '', 1, 0, 'C', '0', '0', 'monitor:cache:list',      'redis-list',    'admin', sysdate(), '', null, '缓存列表菜单');
-insert into sys_menu values('115',  '表单构建', '3',   '1', 'build',      'tool/build/index',         '', '', 1, 0, 'C', '0', '0', 'tool:build:list',         'build',         'admin', sysdate(), '', null, '表单构建菜单');
-insert into sys_menu values('116',  '代码生成', '3',   '2', 'gen',        'tool/gen/index',           '', '', 1, 0, 'C', '0', '0', 'tool:gen:list',           'code',          'admin', sysdate(), '', null, '代码生成菜单');
-insert into sys_menu values('117',  '系统接口', '3',   '3', 'swagger',    'tool/swagger/index',       '', '', 1, 0, 'C', '0', '0', 'tool:swagger:list',       'swagger',       'admin', sysdate(), '', null, '系统接口菜单');
+insert into sys_menu values('200',  '项目列表', '5',   '1', 'project',            'aqy/project/index',           '', '', 1, 0, 'C', '0', '0', 'aqy:project:list',          'tree',       'admin', sysdate(), '', null, '项目列表');
+insert into sys_menu values('201',  '标段管理', '5',   '2', 'section',            'aqy/section/index',           '', '', 1, 0, 'C', '0', '0', 'aqy:section:list',          'tree-table', 'admin', sysdate(), '', null, '标段管理');
+insert into sys_menu values('202',  '采集设备', '6',   '1', 'aqyEquipment',       'aqy/aqyEquipment/index',      '', '', 1, 0, 'C', '0', '0', 'aqy:aqyEquipment:list',     'monitor',    'admin', sysdate(), '', null, '采集设备');
+insert into sys_menu values('203',  '设备部署', '6',   '2', 'equipmentDeploy',    'aqy/equipmentDeploy/index',   '', '', 1, 0, 'C', '0', '0', 'aqy:aqySectionEqmt:list',    'build',      'admin', sysdate(), '', null, '设备部署');
+insert into sys_menu values('204',  '网关设备', '6',   '3', 'gatwayEquipment',    'aqy/gatwayEquipment/index',   '', '', 1, 0, 'C', '0', '0', 'aqy:gatwayEquipment:list',  'server',     'admin', sysdate(), '', null, '网关设备');
+insert into sys_menu values('205',  '设备类型', '6',   '4', 'aqyEquipmentType',   'aqy/aqyEquipmentType/index',  '', '', 1, 0, 'C', '0', '0', 'aqy:aqyEquipmentType:list', 'dict',       'admin', sysdate(), '', null, '设备类型');
+insert into sys_menu values('206',  '摄像头管理', '6', '5', 'camera',             'aqy/aqyCamera/index',         '', '', 1, 0, 'C', '0', '0', 'aqy:camera:list',           'eye-open',   'admin', sysdate(), '', null, '摄像头管理');
+insert into sys_menu values('207',  '设备文件', '6',   '6', 'equipmentFile',      'aqy/aqyEquipmentFile/index',  '', '', 1, 0, 'C', '0', '0', 'aqy:aqyEquipmentFile:list', 'documentation', 'admin', sysdate(), '', null, '设备文件');
+insert into sys_menu values('208',  '告警记录', '7',   '1', 'alarmRecord',        'aqy/alarmRecord/index',       '', '', 1, 0, 'C', '0', '0', 'aqy:alarmRecord:list',      'message',    'admin', sysdate(), '', null, '告警记录');
+insert into sys_menu values('209',  '告警等级', '7',   '2', 'alarmLevel',         'aqy/alarmLevel/index',        '', '', 1, 0, 'C', '0', '0', 'aqy:alarmLevel:list',       'dict',       'admin', sysdate(), '', null, '告警等级');
+insert into sys_menu values('210',  '告警设备', '7',   '3', 'alarmEquipment',     'aqy/alarmEquipment/index',    '', '', 1, 0, 'C', '0', '0', 'aqy:alarmEquipment:list',   'monitor',    'admin', sysdate(), '', null, '告警设备');
+insert into sys_menu values('211',  '短信接收人', '7', '4', 'alarmPerson',        'aqy/alarmPerson/index',       '', '', 1, 0, 'C', '0', '0', 'aqy:alarmPerson:list',      'peoples',    'admin', sysdate(), '', null, '告警短信接收人');
+insert into sys_menu values('212',  '实时数据', '8',   '1', 'realTimeReport',     'aqy/aqyRealTimeReport/index', '', '', 1, 0, 'C', '0', '0', '',                          'chart',      'admin', sysdate(), '', null, '实时数据报表');
+insert into sys_menu values('213',  '历史数据', '8',   '2', 'historyReport',      'aqy/aqyHistoryReport/index',  '', '', 1, 0, 'C', '0', '0', '',                          'date',       'admin', sysdate(), '', null, '历史数据报表');
+insert into sys_menu values('214',  '原始数据', '8',   '3', 'rawReport',          'aqy/aqyRawReport/index',      '', '', 1, 0, 'C', '0', '0', '',                          'form',       'admin', sysdate(), '', null, '原始数据报表');
+insert into sys_menu values('215',  '倾角原始数据', '8', '4', 'qjRaw',            'aqy/aqyEquipmentQjRaw/index', '', '', 1, 0, 'C', '0', '0', 'aqy:aqyEquipmentQjRaw:list', 'form',       'admin', sysdate(), '', null, '倾角原始数据');
+insert into sys_menu values('216',  '雨量原始数据', '8', '5', 'ylRaw',            'aqy/aqyEquipmentYlRaw/index', '', '', 1, 0, 'C', '0', '0', 'aqy:aqyEquipmentYlRaw:list', 'form',       'admin', sysdate(), '', null, '雨量原始数据');
+insert into sys_menu values('217',  '裂缝原始数据', '8', '6', 'lfRaw',            'aqy/aqyEquipmentLfRaw/index', '', '', 1, 0, 'C', '0', '0', 'aqy:aqyEquipmentLfRaw:list', 'form',       'admin', sysdate(), '', null, '裂缝原始数据');
+insert into sys_menu values('218',  '水位原始数据', '8', '7', 'wyRaw',            'aqy/aqyEquipmentWyRaw/index', '', '', 1, 0, 'C', '0', '0', 'aqy:aqyEquipmentWyRaw:list', 'form',       'admin', sysdate(), '', null, '水位原始数据');
+insert into sys_menu values('219',  'MQTT指令', '8',   '8', 'mqttCmdMessage',     'aqy/mqttCmdMessage/index',    '', '', 1, 0, 'C', '0', '0', 'aqy:mqttCmdMessage:list',    'redis',      'admin', sysdate(), '', null, 'MQTT指令消息');
+insert into sys_menu values('220',  '水电入库', '8',   '9', 'sdrk',               'aqy/sdrk/index',              '', '', 1, 0, 'C', '0', '0', 'aqy:sdrkwy:list',           'form',       'admin', sysdate(), '', null, '水电入库数据');
+insert into sys_menu values('221',  '海康位移', '8',   '10', 'hikwy',             'aqy/hikwy/index',             '', '', 1, 0, 'C', '0', '0', 'aqy:hikgnss:list',          'form',       'admin', sysdate(), '', null, '海康位移数据');
 -- 三级菜单
 insert into sys_menu values('500',  '操作日志', '108', '1', 'operlog',    'monitor/operlog/index',    '', '', 1, 0, 'C', '0', '0', 'monitor:operlog:list',    'form',          'admin', sysdate(), '', null, '操作日志菜单');
 insert into sys_menu values('501',  '登录日志', '108', '2', 'logininfor', 'monitor/logininfor/index', '', '', 1, 0, 'C', '0', '0', 'monitor:logininfor:list', 'logininfor',    'admin', sysdate(), '', null, '登录日志菜单');
@@ -235,24 +251,6 @@ insert into sys_menu values('1042', '登录查询', '501', '1', '#', '', '', '',
 insert into sys_menu values('1043', '登录删除', '501', '2', '#', '', '', '', 1, 0, 'F', '0', '0', 'monitor:logininfor:remove',  '#', 'admin', sysdate(), '', null, '');
 insert into sys_menu values('1044', '日志导出', '501', '3', '#', '', '', '', 1, 0, 'F', '0', '0', 'monitor:logininfor:export',  '#', 'admin', sysdate(), '', null, '');
 insert into sys_menu values('1045', '账户解锁', '501', '4', '#', '', '', '', 1, 0, 'F', '0', '0', 'monitor:logininfor:unlock',  '#', 'admin', sysdate(), '', null, '');
--- 在线用户按钮
-insert into sys_menu values('1046', '在线查询', '109', '1', '#', '', '', '', 1, 0, 'F', '0', '0', 'monitor:online:query',       '#', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('1047', '批量强退', '109', '2', '#', '', '', '', 1, 0, 'F', '0', '0', 'monitor:online:batchLogout', '#', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('1048', '单条强退', '109', '3', '#', '', '', '', 1, 0, 'F', '0', '0', 'monitor:online:forceLogout', '#', 'admin', sysdate(), '', null, '');
--- 定时任务按钮
-insert into sys_menu values('1049', '任务查询', '110', '1', '#', '', '', '', 1, 0, 'F', '0', '0', 'monitor:job:query',          '#', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('1050', '任务新增', '110', '2', '#', '', '', '', 1, 0, 'F', '0', '0', 'monitor:job:add',            '#', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('1051', '任务修改', '110', '3', '#', '', '', '', 1, 0, 'F', '0', '0', 'monitor:job:edit',           '#', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('1052', '任务删除', '110', '4', '#', '', '', '', 1, 0, 'F', '0', '0', 'monitor:job:remove',         '#', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('1053', '状态修改', '110', '5', '#', '', '', '', 1, 0, 'F', '0', '0', 'monitor:job:changeStatus',   '#', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('1054', '任务导出', '110', '6', '#', '', '', '', 1, 0, 'F', '0', '0', 'monitor:job:export',         '#', 'admin', sysdate(), '', null, '');
--- 代码生成按钮
-insert into sys_menu values('1055', '生成查询', '116', '1', '#', '', '', '', 1, 0, 'F', '0', '0', 'tool:gen:query',             '#', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('1056', '生成修改', '116', '2', '#', '', '', '', 1, 0, 'F', '0', '0', 'tool:gen:edit',              '#', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('1057', '生成删除', '116', '3', '#', '', '', '', 1, 0, 'F', '0', '0', 'tool:gen:remove',            '#', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('1058', '导入代码', '116', '4', '#', '', '', '', 1, 0, 'F', '0', '0', 'tool:gen:import',            '#', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('1059', '预览代码', '116', '5', '#', '', '', '', 1, 0, 'F', '0', '0', 'tool:gen:preview',           '#', 'admin', sysdate(), '', null, '');
-insert into sys_menu values('1060', '生成代码', '116', '6', '#', '', '', '', 1, 0, 'F', '0', '0', 'tool:gen:code',              '#', 'admin', sysdate(), '', null, '');
 
 
 -- ----------------------------
@@ -285,8 +283,11 @@ create table sys_role_menu (
 -- 初始化-角色和菜单关联表数据
 -- ----------------------------
 insert into sys_role_menu values ('2', '1');
-insert into sys_role_menu values ('2', '2');
-insert into sys_role_menu values ('2', '3');
+insert into sys_role_menu values ('2', '4');
+insert into sys_role_menu values ('2', '5');
+insert into sys_role_menu values ('2', '6');
+insert into sys_role_menu values ('2', '7');
+insert into sys_role_menu values ('2', '8');
 insert into sys_role_menu values ('2', '100');
 insert into sys_role_menu values ('2', '101');
 insert into sys_role_menu values ('2', '102');
@@ -296,15 +297,28 @@ insert into sys_role_menu values ('2', '105');
 insert into sys_role_menu values ('2', '106');
 insert into sys_role_menu values ('2', '107');
 insert into sys_role_menu values ('2', '108');
-insert into sys_role_menu values ('2', '109');
-insert into sys_role_menu values ('2', '110');
-insert into sys_role_menu values ('2', '111');
-insert into sys_role_menu values ('2', '112');
-insert into sys_role_menu values ('2', '113');
-insert into sys_role_menu values ('2', '114');
-insert into sys_role_menu values ('2', '115');
-insert into sys_role_menu values ('2', '116');
-insert into sys_role_menu values ('2', '117');
+insert into sys_role_menu values ('2', '200');
+insert into sys_role_menu values ('2', '201');
+insert into sys_role_menu values ('2', '202');
+insert into sys_role_menu values ('2', '203');
+insert into sys_role_menu values ('2', '204');
+insert into sys_role_menu values ('2', '205');
+insert into sys_role_menu values ('2', '206');
+insert into sys_role_menu values ('2', '207');
+insert into sys_role_menu values ('2', '208');
+insert into sys_role_menu values ('2', '209');
+insert into sys_role_menu values ('2', '210');
+insert into sys_role_menu values ('2', '211');
+insert into sys_role_menu values ('2', '212');
+insert into sys_role_menu values ('2', '213');
+insert into sys_role_menu values ('2', '214');
+insert into sys_role_menu values ('2', '215');
+insert into sys_role_menu values ('2', '216');
+insert into sys_role_menu values ('2', '217');
+insert into sys_role_menu values ('2', '218');
+insert into sys_role_menu values ('2', '219');
+insert into sys_role_menu values ('2', '220');
+insert into sys_role_menu values ('2', '221');
 insert into sys_role_menu values ('2', '500');
 insert into sys_role_menu values ('2', '501');
 insert into sys_role_menu values ('2', '1000');
@@ -353,21 +367,6 @@ insert into sys_role_menu values ('2', '1042');
 insert into sys_role_menu values ('2', '1043');
 insert into sys_role_menu values ('2', '1044');
 insert into sys_role_menu values ('2', '1045');
-insert into sys_role_menu values ('2', '1046');
-insert into sys_role_menu values ('2', '1047');
-insert into sys_role_menu values ('2', '1048');
-insert into sys_role_menu values ('2', '1049');
-insert into sys_role_menu values ('2', '1050');
-insert into sys_role_menu values ('2', '1051');
-insert into sys_role_menu values ('2', '1052');
-insert into sys_role_menu values ('2', '1053');
-insert into sys_role_menu values ('2', '1054');
-insert into sys_role_menu values ('2', '1055');
-insert into sys_role_menu values ('2', '1056');
-insert into sys_role_menu values ('2', '1057');
-insert into sys_role_menu values ('2', '1058');
-insert into sys_role_menu values ('2', '1059');
-insert into sys_role_menu values ('2', '1060');
 
 -- ----------------------------
 -- 8、角色和部门关联表  角色1-N部门

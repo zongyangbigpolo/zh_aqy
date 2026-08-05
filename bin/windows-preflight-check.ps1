@@ -193,19 +193,19 @@ else {
 
 Write-Step "Checking runtime programs"
 $Java = Find-Executable -CommandName "java" -Candidates @(
-    "C:\Program Files\Eclipse Adoptium\jdk-8*\bin\java.exe",
-    "C:\Program Files\Java\jdk1.8*\bin\java.exe",
-    "C:\Program Files\Java\jre1.8*\bin\java.exe"
+    "C:\Program Files\Eclipse Adoptium\jdk-17*\bin\java.exe",
+    "C:\Program Files\Java\jdk-17*\bin\java.exe",
+    "C:\Program Files\Java\jdk17*\bin\java.exe"
 )
 if ($null -eq $Java) {
-    Add-Issue "ERROR" "Java" "Java was not found." "Install Java 8, then reopen this command window."
+    Add-Issue "ERROR" "Java" "Java was not found." "Install Java 17, then reopen this command window."
 }
 else {
     $JavaVersion = Get-JavaVersionText $Java
     Write-Host "[OK] java found: $Java"
     Write-Host $JavaVersion
-    if ($JavaVersion -notmatch 'version "1\.8\.' -and $JavaVersion -notmatch 'version "8\.') {
-        Add-Issue "WARN" "Java" "Java exists but does not look like Java 8." "Install Java 8 or verify this JRE can run aqy-admin.jar."
+    if ($JavaVersion -notmatch 'version "17\.') {
+        Add-Issue "WARN" "Java" "Java exists but does not look like Java 17." "Install Java 17 or verify this JRE can run aqy-admin.jar."
     }
 }
 

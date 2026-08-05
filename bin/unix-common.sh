@@ -51,10 +51,10 @@ find_java() {
 
   local candidate
   for candidate in \
-    /usr/lib/jvm/java-8-openjdk-*/bin/java \
-    /usr/lib/jvm/temurin-8-*/bin/java \
-    /Library/Java/JavaVirtualMachines/temurin-8.jdk/Contents/Home/bin/java \
-    /Library/Java/JavaVirtualMachines/jdk1.8*.jdk/Contents/Home/bin/java
+    /usr/lib/jvm/java-17-openjdk-*/bin/java \
+    /usr/lib/jvm/temurin-17-*/bin/java \
+    /Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home/bin/java \
+    /Library/Java/JavaVirtualMachines/jdk-17*.jdk/Contents/Home/bin/java
   do
     for java_path in ${candidate}; do
       if [[ -x "${java_path}" ]]; then
@@ -67,11 +67,11 @@ find_java() {
   return 1
 }
 
-java_is_version_8() {
+java_is_version_17() {
   local java_path="$1"
   local version_text
   version_text="$("${java_path}" -version 2>&1 || true)"
-  [[ "${version_text}" =~ version\ \"1\.8\. || "${version_text}" =~ version\ \"8\. ]]
+  [[ "${version_text}" =~ version\ \"17\. ]]
 }
 
 find_mysql_cli() {

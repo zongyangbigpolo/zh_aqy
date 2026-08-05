@@ -7,7 +7,7 @@ echo ============================================================
 echo Zh_AqY WINDOWS PREREQUISITE INSTALLER
 echo ============================================================
 echo This helper installs or guides installation of:
-echo   - Java 8
+echo   - Java 17
 echo   - MySQL
 echo   - Redis
 echo Optional:

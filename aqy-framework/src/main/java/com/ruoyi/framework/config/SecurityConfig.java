@@ -114,7 +114,7 @@ public class SecurityConfig
                 requests.antMatchers("/login", "/register", "/captchaImage").permitAll()
                     // 静态资源，可匿名访问
                     .antMatchers(HttpMethod.GET, "/", "/*.html", "/**/*.html", "/**/*.css", "/**/*.js", "/profile/**").permitAll()
-                    .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/*/api-docs", "/druid/**").permitAll()
+                    .antMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/druid/**").permitAll()
                         .antMatchers("/mqtt/**", "mqttCmd/**", "/websocket/**","/aqy/tgy/**","/aqy/sdrk/**").permitAll()
                     // 除上面外的所有请求全部需要鉴权认证
                     .anyRequest().authenticated();

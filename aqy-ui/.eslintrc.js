@@ -1,8 +1,10 @@
 // ESlint 检查配置
 module.exports = {
   root: true,
+  parser: 'vue-eslint-parser',
   parserOptions: {
-    parser: 'babel-eslint',
+    parser: '@babel/eslint-parser',
+    requireConfigFile: false,
     sourceType: 'module'
   },
   env: {

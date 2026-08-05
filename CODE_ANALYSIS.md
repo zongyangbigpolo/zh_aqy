@@ -2,14 +2,14 @@
 
 > 分析时间：2026-07-29  
 > 仓库位置：`/Users/polo2/srccode/try-down-demo/zh_aqy`  
-> 项目基线：RuoYi-Vue 3.8.8 二次开发，面向安全监测/边坡监测场景  
-> 说明：本文档基于当前代码静态分析生成；业务表建表 SQL 未在 `sql/` 目录中发现，数据库结构主要从 Domain、Mapper XML 和前端页面反推。
+> 项目基线：安全云平台二次开发，面向安全监测/边坡监测场景
+> 说明：本文档基于代码静态分析生成；当前仓库已补充 `sql/zh_aqy_schema.sql` 作为安全云业务表结构脚本。
 
 ---
 
 ## 1. 项目总体结论
 
-这是一个基于 **Spring Boot + Spring Security + MyBatis + Redis + JWT + Vue2 + Element UI** 的前后端分离安全云平台。整体以若依 RuoYi-Vue 3.8.8 为基础，新增了安全监测业务模块：
+这是一个基于 **Java 17 + Spring Boot 2.7 + Spring Security + MyBatis + Redis + JWT + Vue 2.7 + Element UI** 的前后端分离安全云平台，核心业务模块包括：
 
 - 工程项目管理
 - 断面管理
@@ -57,8 +57,8 @@
 | 模块 | 作用 |
 |---|---|
 | `aqy-admin` | Spring Boot 启动入口，Web 服务聚合模块 |
-| `aqy-framework` | 若依框架层：安全、Redis、配置、短信服务、Web 基础能力 |
-| `aqy-system` | 若依系统管理：用户、角色、菜单、部门、字典、参数等 |
+| `aqy-framework` | 框架层：安全、Redis、配置、短信服务、Web 基础能力 |
+| `aqy-system` | 系统管理：用户、角色、菜单、部门、字典、参数等 |
 | `aqy-quartz` | 定时任务模块 |
 | `aqy-generator` | 代码生成模块 |
 | `aqy-common` | 通用工具、基础实体、注解、AQY 业务 Domain |
@@ -110,7 +110,7 @@ MyBatis Mapper 扫描由框架配置完成：
 
 | 技术 | 当前用途 |
 |---|---|
-| Spring Boot 2.5.15 | 后端应用框架 |
+| Spring Boot 2.7.18 | 后端应用框架 |
 | Spring Security 5.7.12 | 登录认证、接口权限 |
 | JWT | 无状态 Token |
 | MyBatis | DAO/Mapper 持久化 |

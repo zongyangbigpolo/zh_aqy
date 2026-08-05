@@ -142,7 +142,7 @@ log_step "Checking release package"
 check_package_files || die "Release package is incomplete."
 
 JAVA_BIN="$(find_java || true)"
-[[ -n "${JAVA_BIN}" ]] || die "Java was not found. Install Java 8 first."
+[[ -n "${JAVA_BIN}" ]] || die "Java was not found. Install Java 17 first."
 
 MYSQL_CLI="$(find_mysql_cli || true)"
 [[ -n "${MYSQL_CLI}" || "${MYSQL_USE_SUDO}" == "1" ]] || die "mysql client was not found. Install MySQL client first."

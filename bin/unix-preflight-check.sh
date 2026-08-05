@@ -76,11 +76,11 @@ log_step "Checking runtime programs"
 if JAVA_PATH="$(find_java)"; then
   log_ok "java found: ${JAVA_PATH}"
   "${JAVA_PATH}" -version 2>&1 | sed 's/^/    /'
-  if ! java_is_version_8 "${JAVA_PATH}"; then
-    add_issue WARN Java "Java exists but does not look like Java 8." "Install Java 8 or verify this JRE can run aqy-admin.jar."
+  if ! java_is_version_17 "${JAVA_PATH}"; then
+    add_issue WARN Java "Java exists but does not look like Java 17." "Install Java 17 or verify this JRE can run aqy-admin.jar."
   fi
 else
-  add_issue ERROR Java "Java was not found." "Run bin/RUN-UBUNTU-INSTALL-PREREQS.sh or bin/RUN-MACOS-INSTALL-PREREQS.command, or install Java 8 manually."
+  add_issue ERROR Java "Java was not found." "Run bin/RUN-UBUNTU-INSTALL-PREREQS.sh or bin/RUN-MACOS-INSTALL-PREREQS.command, or install Java 17 manually."
 fi
 
 if MYSQL_CLI="$(find_mysql_cli)"; then

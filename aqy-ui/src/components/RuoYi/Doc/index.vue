@@ -6,10 +6,10 @@
 
 <script>
 export default {
-  name: 'RuoYiDoc',
+  name: 'ProjectDoc',
   data() {
     return {
-      url: 'http://doc.ruoyi.vip/ruoyi-vue'
+      url: 'https://github.com/zongyangbigpolo/zh_aqy/blob/main/README.md'
     }
   },
   methods: {

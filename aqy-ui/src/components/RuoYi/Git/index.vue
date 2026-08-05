@@ -6,10 +6,10 @@
 
 <script>
 export default {
-  name: 'RuoYiGit',
+  name: 'ProjectGit',
   data() {
     return {
-      url: 'https://gitee.com/y_project/RuoYi-Vue'
+      url: 'https://github.com/zongyangbigpolo/zh_aqy'
     }
   },
   methods: {

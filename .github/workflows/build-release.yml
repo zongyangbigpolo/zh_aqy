@@ -20,11 +20,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 8
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "8"
+          java-version: "17"
           cache: maven
 
       - name: Set up Node.js 22
@@ -192,13 +192,13 @@ jobs:
           4. Double-click .\bin\RUN-UPGRADE-EXISTING-WINDOWS.bat
 
           Windows fresh test machine:
-          1. Install Java 8, MySQL, Redis, and optionally nginx.
+          1. Install Java 17, MySQL, Redis, and optionally nginx.
              You can double-click .\bin\RUN-INSTALL-WINDOWS-PREREQS.bat for help.
           2. Run .\bin\RUN-CHECK-WINDOWS-ENV.bat to confirm the machine is ready.
           3. Double-click .\bin\RUN-FRESH-WINDOWS-TEST.bat
 
           Ubuntu fresh test machine:
-          1. Run ./bin/RUN-UBUNTU-INSTALL-PREREQS.sh if Java 8/MySQL/Redis are missing.
+          1. Run ./bin/RUN-UBUNTU-INSTALL-PREREQS.sh if Java 17/MySQL/Redis are missing.
           2. Run ./bin/RUN-UBUNTU-CHECK-ENV.sh.
           3. Run ./bin/RUN-UBUNTU-FRESH-TEST.sh.
 
@@ -208,7 +208,7 @@ jobs:
           3. Run ./bin/RUN-UBUNTU-UPGRADE-EXISTING.sh.
 
           macOS fresh test machine:
-          1. Double-click bin/RUN-MACOS-INSTALL-PREREQS.command if Java 8/MySQL/Redis are missing.
+          1. Double-click bin/RUN-MACOS-INSTALL-PREREQS.command if Java 17/MySQL/Redis are missing.
           2. Double-click bin/RUN-MACOS-CHECK-ENV.command.
           3. Double-click bin/RUN-MACOS-FRESH-TEST.command.
 

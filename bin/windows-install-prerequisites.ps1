@@ -3,7 +3,7 @@
 Installs or guides installation of Zh_AqY Windows prerequisites.
 
 .DESCRIPTION
-Attempts to install Java 8, MySQL, Redis, and optionally Nginx using winget or
+Attempts to install Java 17, MySQL, Redis, and optionally Nginx using winget or
 Chocolatey. Some installers may still require interactive choices, especially
 MySQL root password and Windows service setup.
 #>
@@ -54,18 +54,18 @@ function Find-Executable {
     return $null
 }
 
-function Test-Java8Installed {
+function Test-Java17Installed {
     $Java = Find-Executable -CommandName "java" -Candidates @(
-        "C:\Program Files\Eclipse Adoptium\jdk-8*\bin\java.exe",
-        "C:\Program Files\Java\jdk1.8*\bin\java.exe",
-        "C:\Program Files\Java\jre1.8*\bin\java.exe"
+        "C:\Program Files\Eclipse Adoptium\jdk-17*\bin\java.exe",
+        "C:\Program Files\Java\jdk-17*\bin\java.exe",
+        "C:\Program Files\Java\jdk17*\bin\java.exe"
     )
     if ($null -eq $Java) {
         return $false
     }
 
     $Version = (& $Java -version 2>&1 | Out-String)
-    return ($Version -match 'version "1\.8\.' -or $Version -match 'version "8\.')
+    return ($Version -match 'version "17\.')
 }
 
 function Test-MySqlInstalled {
@@ -177,7 +177,7 @@ function Install-PackageIfMissing {
 Write-Host "============================================================"
 Write-Host "Zh_AqY Windows prerequisite installer"
 Write-Host "============================================================"
-Write-Host "Required: Java 8, MySQL, Redis"
+Write-Host "Required: Java 17, MySQL, Redis"
 Write-Host "Optional: Nginx"
 Write-Host ""
 
@@ -187,12 +187,12 @@ if (-not (Test-IsAdministrator)) {
 
 try {
     if (-not $SkipJava) {
-        Write-Step "Java 8"
+        Write-Step "Java 17"
         Install-PackageIfMissing `
-            -Name "Java 8 JDK" `
-            -InstalledCheck { Test-Java8Installed } `
-            -WingetPackage "EclipseAdoptium.Temurin.8.JDK" `
-            -ChocoPackage "temurin8"
+            -Name "Java 17 JDK" `
+            -InstalledCheck { Test-Java17Installed } `
+            -WingetPackage "EclipseAdoptium.Temurin.17.JDK" `
+            -ChocoPackage "temurin17"
     }
 
     if (-not $SkipMySql) {
@@ -228,7 +228,7 @@ catch {
     Write-Host $_.Exception.Message -ForegroundColor Red
     Write-Host ""
     Write-Host "Manual download links:"
-    Write-Host "- Java 8: https://adoptium.net/temurin/releases/?version=8"
+    Write-Host "- Java 17: https://adoptium.net/temurin/releases/?version=17"
     Write-Host "- MySQL:  https://dev.mysql.com/downloads/installer/"
     Write-Host "- Redis:  https://github.com/tporadowski/redis/releases"
     Write-Host "- Nginx:  https://nginx.org/en/download.html"
@@ -250,4 +250,3 @@ if ($RunPreflight) {
         & $Preflight
     }
 }
-
