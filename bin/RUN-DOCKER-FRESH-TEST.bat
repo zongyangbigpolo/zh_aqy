@@ -23,10 +23,14 @@ for /f "usebackq tokens=1,* delims==" %%A in (".env") do (
 
 docker compose version >nul 2>nul
 if %ERRORLEVEL% EQU 0 (
+  echo Resetting Docker fresh-test containers and volumes...
+  docker compose -f docker-compose.yml -f docker-compose.fresh.yml down -v --remove-orphans
   docker compose -f docker-compose.yml -f docker-compose.fresh.yml up -d --build
 ) else (
   docker-compose --version >nul 2>nul
   if %ERRORLEVEL% EQU 0 (
+    echo Resetting Docker fresh-test containers and volumes...
+    docker-compose -f docker-compose.yml -f docker-compose.fresh.yml down -v --remove-orphans
     docker-compose -f docker-compose.yml -f docker-compose.fresh.yml up -d --build
   ) else (
     echo Docker Compose was not found. Install Docker Desktop first.

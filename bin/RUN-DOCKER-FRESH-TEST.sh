@@ -8,6 +8,10 @@ source "${DIR}/docker-common.sh"
 
 require_docker
 ensure_env
+
+echo "Resetting Docker fresh-test containers and volumes..."
+compose_fresh down -v --remove-orphans
+
 compose_fresh up -d --build
 wait_for_backend
 

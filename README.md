@@ -64,6 +64,8 @@
 
 服务重启策略已经配置为自动重启；服务器重启后，只要 Docker Desktop / Docker Engine 正常启动，容器会自动拉起。
 
+注意：`RUN-DOCKER-FRESH-TEST.*` 是全新测试/演示环境入口。它会先删除本项目 Docker Compose 的旧容器和旧数据卷，再重新初始化 MySQL。不要在已有生产数据的环境上运行 fresh-test；老库请使用迁移入口。
+
 ### 新环境 / 演示环境
 
 下载 Release 包并解压后，在包目录运行：
