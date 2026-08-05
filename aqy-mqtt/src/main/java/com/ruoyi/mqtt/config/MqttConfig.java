@@ -6,6 +6,7 @@ import com.ruoyi.mqtt.properties.MqttProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
@@ -126,6 +127,7 @@ public class MqttConfig {
      * @return {@link org.springframework.integration.core.MessageProducer}
      */
     @Bean
+    @ConditionalOnProperty(prefix = "mqtt", name = "consumer-enabled", havingValue = "true", matchIfMissing = true)
     public MessageProducer inbound() {
         // 可以同时消费（订阅）多个Topic
         MqttPahoMessageDrivenChannelAdapter adapter =
@@ -170,38 +172,6 @@ public class MqttConfig {
             mqttCallbackHandle.handle(topic, payload);
         };
     }
-
-//    /**
-//     * MQTT消息处理器（消费者）
-//     *
-//     * @return {@link org.springframework.messaging.MessageHandler}
-//     */
-//    @Bean
-//    @ServiceActivator(inputChannel = CHANNEL_NAME_IN)
-//    public MessageHandler handler() {
-//        return new MessageHandler() {
-//            @Override
-//            public void handleMessage(org.springframework.messaging.Message<?> message) {
-//                String topic = Objects.requireNonNull(message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC)).toString();
-//                String payload = message.getPayload().toString();
-//                MessageHeaders messageHeaders = message.getHeaders();
-//                UUID paketId = messageHeaders.getId();
-//                Object qos = messageHeaders.get(MqttHeaders.QOS);
-//                Object recvTopic=   messageHeaders.get(MqttHeaders.RECEIVED_TOPIC);
-//                String handleMessage = "接收到MQTT消息, topic: " + recvTopic + ", qos: " + qos + ", payload: " + payload + ", paketId: " + paketId;
-//                log.debug(handleMessage);
-//                System.out.println(handleMessage);
-//                mqttCallbackHandle.handle(topic, payload);
-//            }
-//        };
-////        return message -> {
-////            String topic = Objects.requireNonNull(message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC)).toString();
-////            String payload = message.getPayload().toString();
-////            mqttCallbackHandle.handle(topic, payload);
-////        };
-//    }
-
-
     /**
      * @param event
      * @return void
@@ -233,4 +203,3 @@ public class MqttConfig {
         return new DirectChannel();
     }
 }
-

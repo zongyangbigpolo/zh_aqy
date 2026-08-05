@@ -268,7 +268,6 @@ export default {
       }
     },
     updateChartData() {
-      console.log(313211232)
       if (this.activeName === 'second') {
         this.renderChart();
       }

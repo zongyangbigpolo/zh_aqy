@@ -16,7 +16,7 @@
                 <span class="total">{{ item.total }}</span>
               </div>
               <div class="status-bar">
-                <div class="progress" :style="{ width: `${(item.online / item.total) * 100}%` }"></div>
+                <div class="progress" :style="{ width: `${statProgress(item)}%` }"></div>
               </div>
             </div>
           </div>
@@ -148,6 +148,7 @@ import AMapLoader from '@amap/amap-jsapi-loader'
 import axios from 'axios'
 import {listAqyEquipment, listEqmtsGroupByType, selectAqyEquipmentListForReport} from "@/api/aqy/aqyEquipment";
 import {getProject, listProject} from "@/api/aqy/project";
+import { getAmapJsKey, getAmapWeatherKey } from '@/utils/externalConfig'
 export default {
   name: 'HomePage',
   data() {
@@ -238,37 +239,66 @@ export default {
         { time: '16:00', type: '阴', temp: 29 },
         { time: '17:00', type: '阴', temp: 27 }
       ],
-      map: null
+      map: null,
+      amap: null,
+      weatherTimer: null,
+      dataList: []
     }
   },
   mounted() {
     this.getProjects();
-
-    this.initMap()
   },
   methods: {
+    statProgress(item) {
+      return item && item.total > 0 ? Math.round((item.online / item.total) * 100) : 0
+    },
     getProjects() {
       listProject().then(response => {
-        this.projectOptions = response.rows;
-        if (response.rows)
-          this.projectId = response.rows[0].id
-        else
+        const rows = Array.isArray(response.rows) ? response.rows : []
+        this.projectOptions = rows;
+        if (!rows.length) {
           this.projectId = null;
+          this.projectInfo = {};
+          this.eqmtByTypes = [];
+          this.dataList = [];
+          this.deviceStats = this.createEmptyDeviceStats();
+          this.destroyMap();
+          return;
+        }
 
+        this.projectId = rows[0].id
         this.getProjectInfo(this.projectId);
         this.getEqmtGroupTypes(this.projectId);
         this.getEqmtList(this.projectId);
       });
     },
+    createEmptyDeviceStats() {
+      return [
+        { name: '位移监测', icon: 'el-icon-position', online: 0, total: 0 },
+        { name: '裂缝监测', icon: 'el-icon-warning', online: 0, total: 0 },
+        { name: '雨量监测', icon: 'el-icon-heavy-rain', online: 0, total: 0 },
+        { name: '倾角监测', icon: 'el-icon-refresh', online: 0, total: 0 }
+      ]
+    },
     getProjectInfo(projectId){
+      if (!projectId) {
+        this.projectInfo = {};
+        return;
+      }
       getProject(projectId).then(response => {
-        this.projectInfo = response.data;
+        this.projectInfo = response.data || {};
+        this.initMap(this.projectInfo);
       });
     },
     getEqmtGroupTypes(projectId) {
+      if (!projectId) {
+        this.deviceStats = this.createEmptyDeviceStats();
+        return;
+      }
       listEqmtsGroupByType({projectId: projectId}).then(response => {
         // 处理返回的数据，转换成deviceStats需要的格式
-        this.deviceStats = response.items.map(item => {
+        const items = Array.isArray(response.items) ? response.items : []
+        this.deviceStats = items.map(item => {
           // 图标映射
           const iconMap = {
             '位移': 'el-icon-position',
@@ -284,25 +314,43 @@ export default {
             total: item.totalCount || 0
           }
         })
+        if (!this.deviceStats.length) {
+          this.deviceStats = this.createEmptyDeviceStats();
+        }
       });
     },
     getEqmtList(projectId){
+      if (!projectId) {
+        this.dataList = [];
+        return;
+      }
       selectAqyEquipmentListForReport({projectId: projectId}).then(response => {
-        this.dataList = response.items;
+        this.dataList = Array.isArray(response.items) ? response.items : [];
       });
     },
     // 初始化地图
-    async initMap() {
+    async initMap(projectInfo = {}) {
+      if (!projectInfo || !projectInfo.id) {
+        this.destroyMap();
+        return;
+      }
+      const amapKey = getAmapJsKey()
+      if (!amapKey) {
+        this.destroyMap();
+        return;
+      }
       try {
         const AMap = await AMapLoader.load({
-          key: '3b94601c127d2bda2990542c6fed446c',
+          key: amapKey,
           version: '2.0',
           plugins: ['AMap.ToolBar', 'AMap.Scale']
         })
+        this.amap = AMap
+        const center = this.getMapCenter(projectInfo)
 
         this.map = new AMap.Map('map-container', {
           zoom: 15,
-          center: [118.600908, 31.650577],
+          center,
           mapStyle: 'amap://styles/fresh'
         })
 
@@ -328,7 +376,7 @@ export default {
 
         // 创建标记点
         const marker = new AMap.Marker({
-          position: [118.600908, 31.650577],
+          position: center,
           anchor: 'center',
           offset: new AMap.Pixel(0, 0),
           zIndex: 100,
@@ -377,7 +425,7 @@ export default {
 
         this.map.on('moveend', () => {
           // 确保标记点位置正确
-          marker.setPosition([118.600908, 31.650577])
+          marker.setPosition(center)
         })
 
         marker.setMap(this.map)
@@ -385,6 +433,21 @@ export default {
       } catch (error) {
         console.error('地图加载失败:', error)
       }
+    },
+    getMapCenter(projectInfo) {
+      const longitude = Number(projectInfo.longitude)
+      const latitude = Number(projectInfo.latitude)
+      if (Number.isFinite(longitude) && Number.isFinite(latitude)) {
+        return [longitude, latitude]
+      }
+      return [118.600908, 31.650577]
+    },
+    destroyMap() {
+      if (this.map && typeof this.map.destroy === 'function') {
+        this.map.destroy()
+      }
+      this.map = null
+      this.amap = null
     },
 
     // 创建标记点内容
@@ -444,7 +507,8 @@ export default {
 
     // 更新地图中心点和标记
     updateMapCenter(longitude, latitude) {
-      if (this.map) {
+      if (this.map && this.amap) {
+        const AMap = this.amap
         this.map.clearMap()
         this.map.setCenter([longitude, latitude])
         this.map.setZoom(14)
@@ -550,7 +614,7 @@ export default {
       }
 
       // 处理天气类型中含特定关键的情况
-      const weatherType = type.toLowerCase()
+      const weatherType = String(type || '').toLowerCase()
       if (weatherType.includes('雨')) return 'el-icon-heavy-rain'
       if (weatherType.includes('云')) return 'el-icon-cloudy'
       if (weatherType.includes('晴')) return 'el-icon-sunny'
@@ -565,7 +629,6 @@ export default {
 
     // 处理菜单点击
     handleMenuClick(menu) {
-      console.log(menu.path)
       // 检查权限
       if (menu.permission && !this.checkPermission(menu.permission)) {
         this.$modal.msgError('暂无权限访问');
@@ -615,11 +678,15 @@ export default {
 
     // 获取天气信息
     async getWeather() {
+      const weatherKey = getAmapWeatherKey()
+      if (!weatherKey) {
+        return;
+      }
       try {
         // 使用高德地图天气API
         const response = await axios.get('https://restapi.amap.com/v3/weather/weatherInfo', {
           params: {
-            key: 'c402322dfb9adadda3c73d2211f2a22f', // 替换成您的高德Web服务API密钥
+            key: weatherKey,
             city: '340500', // 马鞍山市的行政区划代码
             extensions: 'base'
           }
@@ -646,7 +713,7 @@ export default {
       // 立即获取一次天气
       this.getWeather()
       // 每30分钟更新一次天气信息
-      setInterval(() => {
+      this.weatherTimer = setInterval(() => {
         this.getWeather()
       }, 30 * 60 * 1000)
     },
@@ -668,11 +735,12 @@ export default {
   created() {
     this.startWeatherRefresh()
   },
-  beforeUnmount() {
+  beforeDestroy() {
     // 清理定时器
     if (this.weatherTimer) {
       clearInterval(this.weatherTimer)
     }
+    this.destroyMap()
   }
 }
 </script>

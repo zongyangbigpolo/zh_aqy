@@ -7,6 +7,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 public class MqttProperties {
     /**
+     * 是否启动 MQTT 消费端订阅
+     */
+    private boolean consumerEnabled = true;
+    /**
      * mqtt地址
      */
     private String[] host;
@@ -82,4 +86,3 @@ public class MqttProperties {
     private boolean willRetained;
 
 }
-

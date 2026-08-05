@@ -8,6 +8,7 @@ import com.ruoyi.common.utils.uuid.UniqueIntGenerator;
 import com.ruoyi.mqtt.enums.CommandMessageType;
 import com.ruoyi.mqtt.model.*;
 import com.ruoyi.mqtt.properties.TopicConstant;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -17,6 +18,7 @@ import javax.annotation.Resource;
  * @Date：2024/10/11 15:54
  */
 @Component
+@Slf4j
 public class CmdMqttSender {
     /**
      * 注入发送MQTT的Bean
@@ -43,8 +45,7 @@ public class CmdMqttSender {
         cmdData.setData(new CmdDownConfigDev(devList));
         cmdData.setMsgId(msgId);
         String payload = JSONUtil.toJsonStr(cmdData);
-        mqttSender.sendToMqtt(topic, 2, payload);
-        System.out.println("发送成功=>" + "主题：" + topic + "  载荷:" + payload);
+        sendCommand(topic, payload);
         return AjaxResult.success("发送成功");
     }
 
@@ -65,8 +66,7 @@ public class CmdMqttSender {
         cmdData.setData(new CmdSampleParamDevList(devList));
         cmdData.setMsgId(msgId);
         String payload = JSONUtil.toJsonStr(cmdData);
-        mqttSender.sendToMqtt(topic, 2, payload);
-        System.out.println("发送成功=>" + "主题：" + topic + "  载荷:" + payload);
+        sendCommand(topic, payload);
         return AjaxResult.success("发送成功");
     }
 
@@ -87,8 +87,7 @@ public class CmdMqttSender {
         cmdData.setData(devData);
         cmdData.setMsgId(msgId);
         String payload = JSONUtil.toJsonStr(cmdData);
-        mqttSender.sendToMqtt(topic, 2, payload);
-        System.out.println("发送成功=>" + "主题：" + topic + "  载荷:" + payload);
+        sendCommand(topic, payload);
         return AjaxResult.success("发送成功");
     }
 
@@ -109,8 +108,7 @@ public class CmdMqttSender {
         cmdData.setData(new CmdSetWorkMode(mode));
         cmdData.setMsgId(msgId);
         String payload = JSONUtil.toJsonStr(cmdData);
-        mqttSender.sendToMqtt(topic, 2, payload);
-        System.out.println("发送成功=>" + "主题：" + topic + "  载荷:" + payload);
+        sendCommand(topic, payload);
         return AjaxResult.success("发送成功");
     }
 
@@ -130,8 +128,7 @@ public class CmdMqttSender {
         cmdData.setData(new CmdEmptyData());
         cmdData.setMsgId(msgId);
         String payload = JSONUtil.toJsonStr(cmdData);
-        mqttSender.sendToMqtt(topic, 2, payload);
-        System.out.println("发送成功=>" + "主题：" + topic + "  载荷:" + payload);
+        sendCommand(topic, payload);
         return AjaxResult.success("发送成功");
     }
 
@@ -152,8 +149,7 @@ public class CmdMqttSender {
         cmdData.setData(new CmdSetTime(curTime));
         cmdData.setMsgId(msgId);
         String payload = JSONUtil.toJsonStr(cmdData);
-        mqttSender.sendToMqtt(topic, 2, payload);
-        System.out.println("发送成功=>" + "主题：" + topic + "  载荷:" + payload);
+        sendCommand(topic, payload);
         return AjaxResult.success("发送成功");
     }
 
@@ -172,8 +168,7 @@ public class CmdMqttSender {
         cmdData.setCmd("getCurrentTime");
         cmdData.setData(new CmdGetCurrentTime(curTime));
         String payload = JSONUtil.toJsonStr(cmdData);
-        mqttSender.sendToMqtt(topic, 2, payload);
-        System.out.println("发送成功=>" + "主题：" + topic + "  载荷:" + payload);
+        sendCommand(topic, payload);
         return AjaxResult.success("发送成功");
     }
 
@@ -193,8 +188,7 @@ public class CmdMqttSender {
         cmdData.setData(new CmdSoundLightAlarm(duration));
         cmdData.setMsgId(msgId);
         String payload = JSONUtil.toJsonStr(cmdData);
-        mqttSender.sendToMqtt(topic, 2, payload);
-        System.out.println("发送成功=>" + "主题：" + topic + "  载荷:" + payload);
+        sendCommand(topic, payload);
         return AjaxResult.success("发送成功");
     }
 
@@ -214,8 +208,7 @@ public class CmdMqttSender {
         cmdData.setData(new CmdEmptyData());
         cmdData.setMsgId(msgId);
         String payload = JSONUtil.toJsonStr(cmdData);
-        mqttSender.sendToMqtt(topic, 2, payload);
-        System.out.println("发送成功=>" + "主题：" + topic + "  载荷:" + payload);
+        sendCommand(topic, payload);
         return AjaxResult.success("发送成功");
     }
 
@@ -235,8 +228,7 @@ public class CmdMqttSender {
         cmdData.setData(new CmdEmptyData());
         cmdData.setMsgId(msgId);
         String payload = JSONUtil.toJsonStr(cmdData);
-        mqttSender.sendToMqtt(topic, 2, payload);
-        System.out.println("发送成功=>" + "主题：" + topic + "  载荷:" + payload);
+        sendCommand(topic, payload);
         return AjaxResult.success("发送成功");
     }
 
@@ -257,8 +249,7 @@ public class CmdMqttSender {
         cmdData.setData(new CmdGetImageDev(devNo));
         cmdData.setMsgId(msgId);
         String payload = JSONUtil.toJsonStr(cmdData);
-        mqttSender.sendToMqtt(topic, 2, payload);
-        System.out.println("发送成功=>" + "主题：" + topic + "  载荷:" + payload);
+        sendCommand(topic, payload);
         return AjaxResult.success("发送成功");
     }
 
@@ -270,5 +261,10 @@ public class CmdMqttSender {
         mqttCmdMessage.setCreateTime(DateUtils.getNowDate());
 //        aqyMqttCmdMessageService.insertAqyMqttCmdMessage(mqttCmdMessage);
         return mqttCmdMessage.getMsgId();
+    }
+
+    private void sendCommand(String topic, String payload) {
+        mqttSender.sendToMqtt(topic, 2, payload);
+        log.info("MQTT command sent. topic={}, payload={}", topic, payload);
     }
 }

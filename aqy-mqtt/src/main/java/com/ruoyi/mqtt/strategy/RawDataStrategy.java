@@ -176,16 +176,10 @@ public class RawDataStrategy implements MessageHandlerStrategy {
                 }
             }
         }catch (Exception ex){
-            ex.printStackTrace();
+            log.error("Failed to handle MQTT raw data payload", ex);
         }
     }
 
-    public static void main(String[] args) {
-        String json1 =  "{\"A108202412020005\": {\"1734566400000\": \"-3.961844,23.962562,-5.704853,36.030761,-6.522626,56.956599\"}}";
-        Map<String, Map<String, Map<String,String>>> bean = JSONObject.parseObject(json1, Map.class);
-        Set<Map.Entry<String, Map<String, Map<String, String>>>> entries = bean.entrySet();
-        System.out.println(bean);
-    }
     @Override
     public String getTopicPattern() {
         return "\\$data/.*/raw";

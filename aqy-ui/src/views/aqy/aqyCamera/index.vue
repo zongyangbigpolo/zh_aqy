@@ -311,7 +311,6 @@ export default {
     getAccessToken() {
       getAccessToken().then(response => {
         this.hikParams.hikToken = response.data.access_token
-        console.log(this.hikParams)
       });
     },
 

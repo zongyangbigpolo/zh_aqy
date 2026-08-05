@@ -10,9 +10,10 @@
         <search id="header-search" class="right-menu-item" />
 
         <el-tag
+          v-if="appDownloadUrl"
           class="right-menu-item hover-effect download-app"
           type="primary"
-          @click="showQrCode"
+          @click="openAppDownload"
         >
           <i class="el-icon-mobile-phone" style="margin-right: 5px;"></i>
           下载APP
@@ -44,18 +45,6 @@
       </el-dropdown>
     </div>
 
-    <el-dialog
-      title="扫码下载APP"
-      :visible.sync="qrCodeVisible"
-      width="300px"
-      center
-      custom-class="qrcode-dialog"
-    >
-      <div class="qrcode-container">
-        <img :src="qrCodeUrl" alt="下载二维码" class="qrcode-img"/>
-        <p class="qrcode-tip">请使用手机浏览器扫描二维码下载</p>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
@@ -67,6 +56,7 @@ import Hamburger from '@/components/Hamburger'
 import Screenfull from '@/components/Screenfull'
 import SizeSelect from '@/components/SizeSelect'
 import Search from '@/components/HeaderSearch'
+import { getAppDownloadUrl } from '@/utils/externalConfig'
 
 export default {
   components: {
@@ -98,13 +88,13 @@ export default {
       get() {
         return this.$store.state.settings.topNav
       }
+    },
+    appDownloadUrl() {
+      return getAppDownloadUrl()
     }
   },
   data() {
-    return {
-      qrCodeVisible: false,
-      qrCodeUrl: require('@/assets/images/app-qrcode.png')
-    }
+    return {}
   },
   methods: {
     toggleSideBar() {
@@ -121,8 +111,10 @@ export default {
         })
       }).catch(() => {});
     },
-    showQrCode() {
-      this.qrCodeVisible = true;
+    openAppDownload() {
+      if (this.appDownloadUrl) {
+        window.open(this.appDownloadUrl, '_blank', 'noopener,noreferrer')
+      }
     }
   }
 }
@@ -237,29 +229,4 @@ export default {
   }
 }
 
-.qrcode-dialog {
-  ::v-deep .el-dialog__header {
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-  }
-
-  .qrcode-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 0;
-
-    .qrcode-img {
-      width: 200px;
-      height: 200px;
-      margin-bottom: 15px;
-    }
-
-    .qrcode-tip {
-      color: #666;
-      font-size: 14px;
-      margin: 0;
-    }
-  }
-}
 </style>

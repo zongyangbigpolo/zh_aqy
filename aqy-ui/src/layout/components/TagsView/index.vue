@@ -30,7 +30,7 @@
 
 <script>
 import ScrollPane from './ScrollPane'
-import path from 'path'
+import { resolveRoutePath } from '@/utils/path'
 
 export default {
   components: { ScrollPane },
@@ -103,7 +103,7 @@ export default {
       let tags = []
       routes.forEach(route => {
         if (route.meta && route.meta.affix) {
-          const tagPath = path.resolve(basePath, route.path)
+          const tagPath = resolveRoutePath(basePath, route.path)
           tags.push({
             fullPath: tagPath,
             path: tagPath,
@@ -112,7 +112,7 @@ export default {
           })
         }
         if (route.children) {
-          const tempTags = this.filterAffixTags(route.children, route.path)
+          const tempTags = this.filterAffixTags(route.children, resolveRoutePath(basePath, route.path))
           if (tempTags.length >= 1) {
             tags = [...tags, ...tempTags]
           }

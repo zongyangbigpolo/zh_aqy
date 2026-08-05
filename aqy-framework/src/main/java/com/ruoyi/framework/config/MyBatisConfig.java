@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import javax.sql.DataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.ibatis.io.VFS;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
@@ -32,6 +34,8 @@ import com.ruoyi.common.utils.StringUtils;
 @Configuration
 public class MyBatisConfig
 {
+    private static final Logger log = LoggerFactory.getLogger(MyBatisConfig.class);
+
     @Autowired
     private Environment env;
 
@@ -64,7 +68,7 @@ public class MyBatisConfig
                             }
                             catch (ClassNotFoundException e)
                             {
-                                e.printStackTrace();
+                                log.debug("Failed to load MyBatis alias class {}", metadataReader.getClassMetadata().getClassName(), e);
                             }
                         }
                     }
@@ -86,7 +90,7 @@ public class MyBatisConfig
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            throw new IllegalStateException("Failed to resolve MyBatis type aliases package: " + typeAliasesPackage, e);
         }
         return typeAliasesPackage;
     }
@@ -106,7 +110,7 @@ public class MyBatisConfig
                 }
                 catch (IOException e)
                 {
-                    // ignore
+                    log.warn("Failed to resolve MyBatis mapper location {}", mapperLocation, e);
                 }
             }
         }

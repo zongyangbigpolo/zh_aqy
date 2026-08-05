@@ -15,11 +15,14 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder;
 import com.alibaba.druid.spring.boot.autoconfigure.properties.DruidStatProperties;
 import com.alibaba.druid.util.Utils;
 import com.ruoyi.common.enums.DataSourceType;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.framework.config.properties.DruidProperties;
 import com.ruoyi.framework.datasource.DynamicDataSource;
@@ -32,6 +35,8 @@ import com.ruoyi.framework.datasource.DynamicDataSource;
 @Configuration
 public class DruidConfig
 {
+    private static final Logger log = LoggerFactory.getLogger(DruidConfig.class);
+
     @Bean
     @ConfigurationProperties("spring.datasource.druid.master")
     public DataSource masterDataSource(DruidProperties druidProperties)
@@ -75,6 +80,7 @@ public class DruidConfig
         }
         catch (Exception e)
         {
+            log.debug("Optional datasource bean '{}' is not configured", beanName, e);
         }
     }
 
@@ -88,6 +94,10 @@ public class DruidConfig
     {
         // 获取web监控页面的参数
         DruidStatProperties.StatViewServlet config = properties.getStatViewServlet();
+        if (StringUtils.isBlank(config.getLoginUsername()) || StringUtils.isBlank(config.getLoginPassword()))
+        {
+            throw new IllegalStateException("Druid stat view is enabled but DRUID_LOGIN_USERNAME/DRUID_LOGIN_PASSWORD are not configured");
+        }
         // 提取common.js的配置路径
         String pattern = config.getUrlPattern() != null ? config.getUrlPattern() : "/druid/*";
         String commonJsPattern = pattern.replaceAll("\\*", "js/common.js");

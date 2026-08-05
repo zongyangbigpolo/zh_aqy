@@ -125,8 +125,7 @@ public class LogAspect
         catch (Exception exp)
         {
             // 记录本地异常日志
-            log.error("异常信息:{}", exp.getMessage());
-            exp.printStackTrace();
+            log.error("记录操作日志异常", exp);
         }
         finally
         {
@@ -203,6 +202,7 @@ public class LogAspect
                     }
                     catch (Exception e)
                     {
+                        log.debug("Failed to serialize operation log argument", e);
                     }
                 }
             }

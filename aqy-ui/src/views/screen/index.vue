@@ -172,6 +172,7 @@ import {listYlRawForCharts} from "@/api/aqy/aqyEquipmentYlRaw";
 import {listLfRawForCharts} from "@/api/aqy/aqyEquipmentLfRaw";
 import {listQjRawForCharts} from "@/api/aqy/aqyEquipmentQjRaw";
 import axios from 'axios'
+import { getAmapWeatherKey, getWebSocketUrl } from '@/utils/externalConfig'
 
 export default {
   name: 'Index',
@@ -181,8 +182,7 @@ export default {
     return {
       // websocket部分
       ws: null, //websocket
-      wsUrl: 'ws://127.0.0.1:7070/prod-api/websocket/message',
-      // wsUrl: 'ws://192.168.1.2:7070/websocket/message',
+      wsUrl: getWebSocketUrl(),
       // 连接标识，避免重复连接
       isConnect: false,
       // 短线重连后，延迟5秒重新创建WebSocket连接，rec用来存储延迟请求的代码
@@ -402,6 +402,8 @@ export default {
       },
       nowTime: '',
       timer: null,
+      weatherTimer: null,
+      isDestroyed: false,
       // 天气信息
       weatherInfo: {
         temperature: '--',
@@ -434,12 +436,24 @@ export default {
 
   },
   destroyed() {
+    this.isDestroyed = true;
     if(this.timer)
       clearInterval(this.timer);
+    if(this.weatherTimer)
+      clearInterval(this.weatherTimer);
+    clearTimeout(this.rec);
+    clearTimeout(this.timeoutObj);
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
   },
   methods: {
     initWebSocket() {
       let that = this;
+      if (that.isDestroyed || !that.wsUrl) {
+        return;
+      }
       that.ws = new WebSocket(that.wsUrl);
       that.ws.onopen = that.webSocketOnOpen;
       that.ws.onmessage = that.webSocketOnMessage;
@@ -451,21 +465,28 @@ export default {
     },
     webSocketOnOpen() {
       let that = this;
+      that.isConnect = true;
       //建立连接后开始心跳
       //因为nginx一般回设置例如60s没有传输数据就断开连接，所以要定时发送数据
       that.timeoutObj = setTimeout(function () {
-        if (that.isConnect)
+        if (that.isConnect && that.ws && that.ws.readyState === WebSocket.OPEN)
           that.ws.send(that.checkMsg);
       }, that.timeout);
     },
     webSocketOnError() {
       let that = this;
+      if (that.isDestroyed) {
+        return;
+      }
       //连接断开后修改标识
       that.isConnect = false;
       //连接错误，需要重新连接
       that.reConnect();
     },
     webSocketOnMessage(e) {
+      if (!this.projectId) {
+        return;
+      }
       //数据接收
       if (e.data && e.data.indexOf('{') === 0) {
         var jsonData = JSON.parse(e.data);
@@ -540,6 +561,9 @@ export default {
     },
     webSocketClose(e) {
       let that = this;
+      if (that.isDestroyed) {
+        return;
+      }
       //连接断开后修改标识
       that.isConnect = false;
       //连接错误，需要重连
@@ -547,6 +571,9 @@ export default {
     },
     reConnect() {
       let that = this;
+      if (that.isDestroyed) {
+        return;
+      }
       //如果已经脸上就不再重连
       if (that.isConnect) {
         return;
@@ -560,12 +587,15 @@ export default {
 
     getProjects() {
       listProject().then(response => {
-        this.projectOptions = response.rows;
-        if (response.rows)
-          this.projectId = response.rows[0].id
-        else
+        const rows = Array.isArray(response.rows) ? response.rows : [];
+        this.projectOptions = rows;
+        if (!rows.length) {
           this.projectId = null;
+          this.resetProjectData();
+          return;
+        }
 
+        this.projectId = rows[0].id
         this.getProjectInfo(this.projectId);
         this.getEqmtTypes(this.projectId);
         this.getEqmtGroupTypes(this.projectId);
@@ -576,12 +606,38 @@ export default {
         this.getQjChartData(this.projectId);
       });
     },
+    resetProjectData() {
+      this.projectInfo = {};
+      this.eqmtByTypes = [];
+      this.alarmStatusData = {
+        hasAlarm: false,
+        items: [],
+        maxLevel: 0
+      };
+      this.shiftData = [];
+      this.rainData = [];
+      this.fissureData = [];
+      this.dipAngleData = [];
+      this.map([]);
+      this.createWyChart();
+      this.createYlChart();
+      this.createLfChart();
+      this.createQjChart();
+    },
     getProjectInfo(projectId) {
+      if (!projectId) {
+        this.projectInfo = {};
+        return;
+      }
       getProject(projectId).then(response => {
-        this.projectInfo = response.data;
+        this.projectInfo = response.data || {};
       });
     },
     getEqmtTypes(projectId) {
+      if (!projectId) {
+        this.map([]);
+        return;
+      }
       listEqmtTypeByProjectId(projectId).then(response => {
         let mapValue = '';
         if (response.items) {
@@ -590,11 +646,16 @@ export default {
           })
         }
         let data = [];
-        data.push({name: this.projectInfo.city, value: mapValue});
+        if (this.projectInfo && this.projectInfo.city) {
+          data.push({name: this.projectInfo.city, value: mapValue});
+        }
         this.map(data);
       });
     },
     map(mapData) {
+      if (!this.$refs.mapCharts) {
+        return;
+      }
       var myChart = echarts.init(this.$refs.mapCharts);
 
       let that = this;
@@ -680,11 +741,23 @@ export default {
       });
     },
     getEqmtGroupTypes(projectId) {
+      if (!projectId) {
+        this.eqmtByTypes = [];
+        return;
+      }
       listEqmtsGroupByType({projectId: projectId}).then(response => {
-        this.eqmtByTypes = response.items;
+        this.eqmtByTypes = Array.isArray(response.items) ? response.items : [];
       });
     },
     getEqmtAlarmStatus(projectId) {
+      if (!projectId) {
+        this.alarmStatusData = {
+          hasAlarm: false,
+          items: [],
+          maxLevel: 0
+        };
+        return;
+      }
       queryEquipmentAlarmStatus({projectId: projectId}).then(response => {
         this.alarmStatusData.hasAlarm = response.hasAlarm;
         this.alarmStatusData.items = response.items;
@@ -692,6 +765,11 @@ export default {
       });
     },
     getWyChartData(projectId) {
+      if (!projectId) {
+        this.shiftData = [];
+        this.createWyChart();
+        return;
+      }
       this.shiftData = [];
       listWyRawForCharts().then(response => {
         if (response.code === 200) {
@@ -844,6 +922,10 @@ export default {
 
     getYlChartData(projectId) {
       this.rainData = [];
+      if (!projectId) {
+        this.createYlChart();
+        return;
+      }
       listYlRawForCharts({limit: 10}).then(response => {
         if (response.code === 200) {
           this.rainData = response.items;
@@ -863,6 +945,10 @@ export default {
       this.rainChart('rainChart', xAxisMarks, serielXItemData);
     },
     rainChart(elem, xAxisMarks, serielXItemData) {
+      const container = document.getElementById(elem);
+      if (!container) {
+        return;
+      }
       var option = {
         tooltip: {trigger: 'axis',axisPointer: {lineStyle: {color: '#fff'}}},
         // legend: {
@@ -906,13 +992,17 @@ export default {
           data: serielXItemData,
         }]
       };
-      var myChart = echarts.init(document.getElementById(elem));
+      var myChart = echarts.init(container);
       myChart.clear();
       myChart.setOption(option);
     },
 
     getLfChartData(projectId) {
       this.fissureData = [];
+      if (!projectId) {
+        this.createLfChart();
+        return;
+      }
       listLfRawForCharts({projectId: projectId, eqmtTypeSymbol: 'LF', limit: 10}).then(response => {
         if (response.code === 200) {
           this.fissureData = response.items;
@@ -932,6 +1022,10 @@ export default {
       this.fissureChart('fissureChart', xAxisMarks, serielXItemData);
     },
     fissureChart(elem, xAxisMarks, serielXItemData) {
+      const container = document.getElementById(elem);
+      if (!container) {
+        return;
+      }
       var option = {
         tooltip: {trigger: 'axis',axisPointer: {lineStyle: {color: '#fff'}}},
         // legend: {
@@ -979,13 +1073,17 @@ export default {
           data: serielXItemData
         }]
       };
-      var myChart = echarts.init(document.getElementById(elem));
+      var myChart = echarts.init(container);
       myChart.clear();
       myChart.setOption(option);
     },
 
     getQjChartData(projectId) {
       this.dipAngleData = [];
+      if (!projectId) {
+        this.createQjChart();
+        return;
+      }
       listQjRawForCharts({projectId: projectId, eqmtTypeSymbol: 'QJ', limit: 10}).then(response => {
         if (response.code === 200) {
           this.dipAngleData = response.items;
@@ -1010,6 +1108,10 @@ export default {
       this.dipAngleChart('dipAngleChart', legends, xAxisMarks, serielXItemData, serielYItemData, serielZItemData);
     },
     dipAngleChart(elem, legends, xAxisMarks, serielXItemData, serielYItemData, serielZItemData) {
+      const container = document.getElementById(elem);
+      if (!container) {
+        return;
+      }
       var option = {
         tooltip: {trigger: 'axis', axisPointer: {lineStyle: {color: '#fff'}}},
         legend: {
@@ -1115,7 +1217,7 @@ export default {
         ]
       };
 
-      var myChart = echarts.init(document.getElementById(elem));
+      var myChart = echarts.init(container);
       myChart.clear();
       myChart.setOption(option);
     },
@@ -1147,18 +1249,22 @@ export default {
       // 立即获取一次天气
       this.getWeather()
       // 每30分钟更新一次天气信息
-      setInterval(() => {
+      this.weatherTimer = setInterval(() => {
         this.getWeather()
       }, 30 * 60 * 1000)
     },
 
     // 获取天气信息
     async getWeather() {
+      const weatherKey = getAmapWeatherKey()
+      if (!weatherKey) {
+        return;
+      }
       try {
         // 使用高德地图天气API
         const response = await axios.get('https://restapi.amap.com/v3/weather/weatherInfo', {
           params: {
-            key: 'c402322dfb9adadda3c73d2211f2a22f', // 替换成您的高德Web服务API密钥
+            key: weatherKey,
             city: '340500', // 马鞍山市的行政区划代码
             extensions: 'base'
           }
@@ -1198,7 +1304,7 @@ export default {
       }
 
       // 处理天气类型中包含特定关键的情况
-      const weatherType = type.toLowerCase()
+      const weatherType = String(type || '').toLowerCase()
       if (weatherType.includes('雨')) return 'el-icon-heavy-rain'
       if (weatherType.includes('云')) return 'el-icon-cloudy'
       if (weatherType.includes('晴')) return 'el-icon-sunny'

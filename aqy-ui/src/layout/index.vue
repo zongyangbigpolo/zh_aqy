@@ -28,7 +28,7 @@ import RightPanel from '@/components/RightPanel'
 import { AppMain, Navbar, Settings, Sidebar, TagsView } from './components'
 import ResizeMixin from './mixin/ResizeHandler'
 import { mapState } from 'vuex'
-import variables from '@/assets/styles/variables.scss'
+import variables from '@/assets/styles/variables'
 import { soundLightAlarm } from '@/api/aqy/cmdMqtt'
 import {updateAlarmEquipment} from "@/api/aqy/alarmEquipment";
 export default {
@@ -85,9 +85,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-
         soundLightAlarm().then(response => {
-          console.log(response);
           this.$message({
             type: 'success',
             message: '报警成功!'

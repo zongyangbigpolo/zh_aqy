@@ -36,12 +36,6 @@ export default {
   computed: {
   },
   created() {
-    // console.log('屏幕宽度', document.documentElement.clientWidth)
-    // console.log('屏幕高度度', document.documentElement.clientHeight)
-    let type = navigator.userAgent;
-
-    // console.log('设备', type)
-
     this.clientWidth = document.documentElement.clientWidth
     this.clientHeight = document.documentElement.clientHeight
     this.left = this.clientWidth - this.itemWidth - this.gapWidth - 20;
@@ -56,7 +50,6 @@ export default {
 
     },
     handleScrollStart() {
-      console.log('这是啥时候触发呀？ScrollStart')
       this.timer && clearTimeout(this.timer)
       this.timer = setTimeout(() => {
         this.handleScrollEnd()
@@ -90,7 +83,6 @@ export default {
 
       // 在拖拽的过程中，组件应该跟随手指的移动而移动。
       floatButton.addEventListener("touchmove", (e) => {
-        // console.log('移动中', e)
         if (e.targetTouches.length === 1) {         // 一根手指
           document.body.addEventListener('touchmove', this.bodyScroll, { passive: false });  //禁止页面滑动
           let touch = e.targetTouches[0]
@@ -103,7 +95,6 @@ export default {
       // 拖拽结束以后，重新调整组件的位置并重新设置过度动画。
       floatButton.addEventListener("touchend", () => {
         floatButton.style.transition = 'all 0.3s'
-        console.log('拖拽结束后left', this.left)
         document.body.removeEventListener('touchmove', this.bodyScroll, { passive: false });  //解除页面禁止滑动
         if (this.left > document.documentElement.clientWidth / 2) {
           this.left = document.documentElement.clientWidth - this.itemWidth - 20;

@@ -1,5 +1,6 @@
 package com.ruoyi.mqtt.strategy;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
  * 通过 MessageHandlerRegistry 注册表获取对应主题的消息处理策略，并调用相应的处理方法来处理消息。
  */
 @Service
+@Slf4j
 public class  MessageService {
     /**
      * 消息处理策略的注册表。
@@ -36,7 +38,7 @@ public class  MessageService {
             handler.setTopic(topic);
             handler.handle(payload);
         } else {
-            System.out.println("No handler found for topic: " + topic);
+            log.debug("No MQTT message handler found for topic: {}", topic);
         }
     }
 }

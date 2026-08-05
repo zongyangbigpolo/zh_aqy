@@ -7,6 +7,7 @@ import com.ruoyi.mqtt.properties.TopicConstant;
 import com.ruoyi.mqtt.sender.IMqttSender;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,7 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("/aqy/mqtt")
 @Api( value = "MQTT接口", tags = "MQTT接口")
+@Slf4j
 public class MqttController2 {
 
 
@@ -47,7 +49,7 @@ public class MqttController2 {
         String topic = TopicConstant.TOPIC_DATA_RESP.replace("${deviceIdentity}", deviceId);
         String payload = JSONUtil.toJsonStr(iotData);
         mqttSender.sendToMqtt(topic, payload);
-        System.out.println("发送成功=>" + "主题：" + topic + "  载荷:" + payload);
+        log.info("MQTT control command sent. topic={}, payload={}", topic, payload);
         return AjaxResult.success("发送成功");
     }
 
@@ -58,7 +60,7 @@ public class MqttController2 {
         String topic = TopicConstant.TOPIC_DATA_SUBSCRIBE.replace("${deviceIdentity}", deviceId);
         String payload = JSONUtil.toJsonStr(iotData);
         mqttSender.sendToMqtt(topic, payload);
-        System.out.println("发送成功=>" + "主题：" + topic + "  载荷:" + payload);
+        log.info("MQTT data subscribe sent. topic={}, payload={}", topic, payload);
         return AjaxResult.success("发送成功");
     }
 

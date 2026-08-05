@@ -13,6 +13,7 @@ ruoyi:
   # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
 mqtt:
+  consumerEnabled: ${MQTT_CONSUMER_ENABLED:true}
   host:
     - ${MQTT_HOST:}
   username: ${MQTT_USERNAME:}
@@ -154,10 +155,15 @@ pagehelper:
   supportMethodsArguments: true
   params: count=countSql
 
-# Swagger配置
+# OpenAPI/Swagger 接口文档默认关闭，生产环境不要匿名暴露
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:false}
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}
+
 swagger:
-  # 是否开启swagger
-  enabled: true
+  enabled: ${SWAGGER_ENABLED:false}
   # 请求前缀
   pathMapping: /dev-api
 

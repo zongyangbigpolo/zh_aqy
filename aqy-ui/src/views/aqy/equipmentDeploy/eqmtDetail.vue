@@ -211,7 +211,6 @@ export default {
                       })
                     });
                   }
-                  console.log(this.details)
                 }
               });
 

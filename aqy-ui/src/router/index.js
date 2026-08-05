@@ -219,8 +219,29 @@ Router.prototype.replace = function push(location) {
   return routerReplace.call(this, location).catch(err => err)
 }
 
-export default new Router({
+const router = new Router({
   mode: 'history', // 去掉url中的#
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRoutes
 })
+
+router.onError(error => {
+  const message = error && error.message ? error.message : ''
+  const isStaleChunk = /Loading (CSS )?chunk .* failed|ChunkLoadError|Failed to fetch dynamically imported module|Unexpected token '<'/.test(message)
+  if (!isStaleChunk) {
+    return
+  }
+
+  if (sessionStorage.getItem('zh-aqy:chunk-reload')) {
+    sessionStorage.removeItem('zh-aqy:chunk-reload')
+    return
+  }
+  sessionStorage.setItem('zh-aqy:chunk-reload', '1')
+  window.location.reload()
+})
+
+router.afterEach(() => {
+  sessionStorage.removeItem('zh-aqy:chunk-reload')
+})
+
+export default router

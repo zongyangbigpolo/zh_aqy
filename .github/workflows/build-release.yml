@@ -42,7 +42,7 @@ jobs:
           {
             node -v
             npm -v
-            npm install --legacy-peer-deps --no-audit --no-fund
+            npm ci --legacy-peer-deps --no-audit --no-fund
           } 2>&1 | tee ../frontend-build.log
 
       - name: Build frontend
@@ -67,6 +67,16 @@ jobs:
             exit 1
           fi
           test -f dist/index.html
+
+      - name: Validate Docker Compose configs
+        env:
+          MYSQL_ROOT_PASSWORD: ci-root-password
+          DB_PASSWORD: ci-db-password
+          TOKEN_SECRET: ci-token-secret-for-compose-validation
+          DRUID_LOGIN_PASSWORD: ci-druid-password
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.fresh.yml config >/dev/null
+          docker compose -f docker-compose.yml -f docker-compose.migrate.yml config >/dev/null
 
       - name: Upload frontend build log
         if: failure()
@@ -224,6 +234,12 @@ jobs:
           The fresh-test script imports initialization SQL only for empty/disposable test databases.
           Do not run fresh-test scripts on an existing production/old server.
           EOF
+          test -s "${PACKAGE_DIR}/server/aqy-admin.jar"
+          test -f "${PACKAGE_DIR}/web/index.html"
+          test -f "${PACKAGE_DIR}/docker-compose.yml"
+          test -f "${PACKAGE_DIR}/deploy/docker/nginx.conf"
+          test -f "${PACKAGE_DIR}/sql/ry_20240629.sql"
+          test -x "${PACKAGE_DIR}/bin/RUN-DOCKER-FRESH-TEST.sh"
           zip -r "${PACKAGE_DIR}.zip" "${PACKAGE_DIR}"
           tar -czf "${PACKAGE_DIR}.tar.gz" "${PACKAGE_DIR}"
 

@@ -202,7 +202,6 @@ public class FileUploadUtils
 
     public static final String getPathFileName(String uploadDir, String fileName) throws IOException
     {
-        System.out.println("RuoYiConfig"+RuoYiConfig.getProfile());
         int dirLastIndex = RuoYiConfig.getProfile().length() + 1;
         String currentDir = StringUtils.substring(uploadDir, dirLastIndex);
         if (("".equals(currentDir) || currentDir==null)){

@@ -86,7 +86,6 @@ export default {
   },
   methods: {
     init(hikParams, row) {
-      console.log(row);
       hikParams.deviceSerial = row.qmtCode
       this.open = true;
       this.remainingTime = 120000;
