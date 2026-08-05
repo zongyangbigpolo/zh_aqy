@@ -46,6 +46,8 @@ nbdist/
 .svn/
 .env
 backups/
+/server/
+/web/
 baseDir/
 null/
 

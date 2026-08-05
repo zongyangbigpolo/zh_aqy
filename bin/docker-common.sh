@@ -83,7 +83,7 @@ apply_migrations() {
   shopt -s nullglob
   for file in "${migrations_dir}"/*.sql; do
     echo "Applying migration: ${file##*/}"
-    compose_migrate exec -T mysql mysql -u"${DB_USERNAME}" -p"${DB_PASSWORD}" "${DB_NAME}" < "${file}"
+    compose_migrate exec -T mysql mysql --default-character-set=utf8mb4 -u"${DB_USERNAME}" -p"${DB_PASSWORD}" "${DB_NAME}" < "${file}"
     applied=$((applied + 1))
   done
   shopt -u nullglob
@@ -94,7 +94,7 @@ apply_migrations() {
 }
 
 reset_target_database() {
-  compose_migrate exec -T mysql mysql -uroot -p"${MYSQL_ROOT_PASSWORD}" -e "DROP DATABASE IF EXISTS \`${DB_NAME}\`; CREATE DATABASE \`${DB_NAME}\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci; GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USERNAME}'@'%'; FLUSH PRIVILEGES;"
+  compose_migrate exec -T mysql mysql --default-character-set=utf8mb4 -uroot -p"${MYSQL_ROOT_PASSWORD}" -e "DROP DATABASE IF EXISTS \`${DB_NAME}\`; CREATE DATABASE \`${DB_NAME}\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci; GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USERNAME}'@'%'; FLUSH PRIVILEGES;"
 }
 
 default_old_db_host() {

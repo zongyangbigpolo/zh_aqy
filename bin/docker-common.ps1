@@ -194,7 +194,7 @@ function Reset-TargetDatabase {
     $DbUser = $EnvValues["DB_USERNAME"]
     $RootPassword = $EnvValues["MYSQL_ROOT_PASSWORD"]
     $Sql = "DROP DATABASE IF EXISTS ``$DbName``; CREATE DATABASE ``$DbName`` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci; GRANT ALL PRIVILEGES ON ``$DbName``.* TO '$DbUser'@'%'; FLUSH PRIVILEGES;"
-    Invoke-ComposeMigrate -Arguments @("exec", "-T", "mysql", "mysql", "-uroot", "-p$RootPassword", "-e", $Sql)
+    Invoke-ComposeMigrate -Arguments @("exec", "-T", "mysql", "mysql", "--default-character-set=utf8mb4", "-uroot", "-p$RootPassword", "-e", $Sql)
 }
 
 function Invoke-MySqlFile {
@@ -205,7 +205,7 @@ function Invoke-MySqlFile {
 
     Invoke-DockerComposeWithInputFile `
         -Files @("docker-compose.yml", "docker-compose.migrate.yml") `
-        -Arguments @("exec", "-T", "mysql", "mysql", "-u$($EnvValues['DB_USERNAME'])", "-p$($EnvValues['DB_PASSWORD'])", $EnvValues["DB_NAME"]) `
+        -Arguments @("exec", "-T", "mysql", "mysql", "--default-character-set=utf8mb4", "-u$($EnvValues['DB_USERNAME'])", "-p$($EnvValues['DB_PASSWORD'])", $EnvValues["DB_NAME"]) `
         -InputFile $InputFile
 }
 
@@ -217,7 +217,7 @@ function Invoke-RootMySqlFile {
 
     Invoke-DockerComposeWithInputFile `
         -Files @("docker-compose.yml", "docker-compose.migrate.yml") `
-        -Arguments @("exec", "-T", "mysql", "mysql", "-uroot", "-p$($EnvValues['MYSQL_ROOT_PASSWORD'])", $EnvValues["DB_NAME"]) `
+        -Arguments @("exec", "-T", "mysql", "mysql", "--default-character-set=utf8mb4", "-uroot", "-p$($EnvValues['MYSQL_ROOT_PASSWORD'])", $EnvValues["DB_NAME"]) `
         -InputFile $InputFile
 }
 

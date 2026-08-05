@@ -75,7 +75,7 @@ echo "Resetting Docker target database ..."
 reset_target_database
 
 echo "Importing dump into Docker MySQL ..."
-compose_migrate exec -T mysql mysql -uroot -p"${MYSQL_ROOT_PASSWORD}" "${DB_NAME}" < "${dump_file}"
+compose_migrate exec -T mysql mysql --default-character-set=utf8mb4 -uroot -p"${MYSQL_ROOT_PASSWORD}" "${DB_NAME}" < "${dump_file}"
 
 apply_migrations
 
