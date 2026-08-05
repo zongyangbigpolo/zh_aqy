@@ -157,6 +157,15 @@ bin/unix-install-prerequisites.sh
 bin/unix-fresh-test-deploy.sh
 bin/unix-upgrade-existing.sh
 docker-compose.yml
+docker-compose.fresh.yml
+docker-compose.migrate.yml
+bin/docker-common.sh
+bin/docker-generate-env.sh
+bin/docker-migrate-existing-db.sh
+bin/docker-backup-db.sh
+bin/docker-restore-db.sh
+bin/docker-status.sh
+bin/docker-stop.sh
 deploy/docker/backend.Dockerfile
 deploy/docker/nginx.conf
 deploy/docker/mysql-init/00-import-release-sql.sh

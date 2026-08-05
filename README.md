@@ -46,9 +46,33 @@ Spring Boot 后端服务（aqy-admin.jar，内置 Tomcat）
 | 缓存 | Redis |
 | 设备接入 | MQTT |
 | 短信 | 阿里云短信服务 |
-| 部署 | Windows / Linux 均可，推荐后端 Jar + 前端 Nginx 静态站点 |
+| 部署 | 推荐 Docker Compose；保留原生 Jar + Nginx/IIS 部署作为备用 |
 
 前端不是 React，也不是移动端 App；它是 Vue 2 单页管理后台。开发目录是 `aqy-ui`，生产构建命令是 `npm run build:prod`，构建结果在 `aqy-ui/dist`。
+
+## 技术栈现状与升级建议
+
+当前项目能正常构建和运行，但技术栈来自 RuoYi-Vue 老版本体系，主要风险不是“马上跑不起来”，而是后续维护、依赖安全修复和新平台兼容成本会逐步增加。
+
+| 方向 | 当前情况 | 风险判断 | 建议 |
+| --- | --- | --- | --- |
+| Java / Spring Boot | Java 8、Spring Boot 2.5.15、Spring Framework 5.3.x、Spring Security 5.7.x | 偏老。继续运行没问题，但未来安全补丁和生态兼容会越来越受限。 | 不要在本次部署改造里硬升。后续单独拉分支评估 Java 17 + Spring Boot 3，重点处理 `javax` 到 `jakarta`、Spring Security 配置、MyBatis/Redis/Swagger 兼容。 |
+| API 文档 | Springfox Swagger 3.0.0 | Springfox 生态较老，和 Spring Boot 3 不兼容风险高。 | 后续升级后端大版本时迁移到 springdoc-openapi。 |
+| JWT | `io.jsonwebtoken:jjwt:0.9.1` | API 老，后续 Java/Spring 升级时容易成为兼容点。 | 后续迁移到新版 JJWT 模块化依赖，或统一调整 Token 签发与解析封装。 |
+| Excel / Office | Apache POI 4.1.2、前端 `xlsx 0.18.5`、`xlsx-style 0.8.13` | 偏老，特别是前端 Excel 生态长期维护较弱。 | 短期不动，避免导入导出格式变化；后续单独做 Excel 功能回归后再升级/替换。 |
+| 前端框架 | Vue 2.6.12、Vue CLI 4.4.6、Webpack 4、Element UI 2.15.x | 明显偏老。Vue 2 和 Vue CLI 已进入维护/停止维护阶段。 | 不建议直接在当前分支升级。Vue 3 + Vite + Element Plus 是重构级工作，应单独立项。 |
+| 前端构建 | CI 使用 Node.js 22，并通过 `--openssl-legacy-provider` 兼容旧 Webpack | 可以构建，但说明构建链路仍是旧体系。 | Docker-first 交付稳定后，再考虑前端现代化分支。 |
+| 前端杂项库 | `highlight.js 9.x`、`quill 1.3.x`、`jsencrypt 3.0.0-rc.1` 等 | 有些库版本较老或停留在 RC。 | 不建议一次性全升；优先针对实际用到的页面做小范围替换和回归。 |
+| package engines | `package.json` 仍写 `node >=8.9`、`npm >=3.0.0` | 文档和实际 CI 推荐 Node 22 不一致。 | 后续可把 engines 调整到 Node 22/npm 10，但要先确认开发机和 CI 都统一。 |
+
+结论：
+
+1. **当前最优先是 Docker-first 交付稳定**，让 Windows、macOS、Ubuntu 统一部署方式。
+2. **不要把 Vue 2、Spring Boot 3、Java 17 这些大升级和部署脚本改造混在一起**，否则风险和回归范围会失控。
+3. 后续建议拆成两个独立技术升级分支：
+   - `feature/backend-modernization`：Java 17、Spring Boot 3、springdoc-openapi、JJWT 新版。
+   - `feature/frontend-modernization`：Vue 3、Vite、Element Plus、前端依赖替换。
+4. 每次升级都要配合数据库、登录、权限、菜单、文件上传、Excel 导入导出、告警短信、MQTT 接入等完整回归。
 
 ## 目录说明
 
@@ -479,9 +503,20 @@ zh-aqy-cross-platform-版本号
 │   ├── RUN-DOCKER-FRESH-TEST.bat
 │   ├── RUN-DOCKER-FRESH-TEST.sh
 │   ├── RUN-DOCKER-FRESH-TEST.command
+│   ├── RUN-DOCKER-MIGRATE-EXISTING-DB.bat
+│   ├── RUN-DOCKER-MIGRATE-EXISTING-DB.sh
+│   ├── RUN-DOCKER-MIGRATE-EXISTING-DB.command
+│   ├── RUN-DOCKER-BACKUP-DB.*
+│   ├── RUN-DOCKER-RESTORE-DB.*
+│   ├── RUN-DOCKER-STATUS.*
+│   ├── RUN-DOCKER-STOP.*
 │   ├── deploy-release.ps1
+│   ├── docker-common.ps1
+│   ├── docker-common.sh
 │   ├── docker-generate-env.ps1
 │   ├── docker-generate-env.sh
+│   ├── docker-migrate-existing-db.ps1
+│   ├── docker-migrate-existing-db.sh
 │   ├── windows-fresh-test-deploy.ps1
 │   ├── windows-preflight-check.ps1
 │   ├── windows-install-prerequisites.ps1
@@ -494,20 +529,30 @@ zh-aqy-cross-platform-版本号
 ├── sql
 │   ├── ry_20240629.sql
 │   ├── quartz.sql
-│   └── zh_aqy_schema.sql
+│   ├── zh_aqy_schema.sql
+│   └── migrations
 ├── deploy
 │   └── docker
 │       ├── backend.Dockerfile
 │       ├── nginx.conf
 │       └── mysql-init
 ├── docker-compose.yml
+├── docker-compose.fresh.yml
+├── docker-compose.migrate.yml
 ├── README.md
 └── START-HERE.txt
 ```
 
-## 推荐：Docker Compose 跨平台全新测试部署
+## 推荐：Docker-first 跨平台部署
 
-如果是全新测试机、演示机，最推荐使用 Docker Compose。它在 Windows、Ubuntu、macOS 上流程基本一致，只需要机器先安装 Docker Desktop 或 Docker Engine + Compose 插件，不需要分别手动安装 Java、MySQL、Redis、Nginx。
+本项目是前后端分离架构，天然适合 Docker Compose：
+
+1. 前端由 Nginx 容器提供静态文件和 `/prod-api/` 代理。
+2. 后端由 Java 8 JRE 容器运行 `aqy-admin.jar`。
+3. MySQL 和 Redis 都由容器提供。
+4. Windows、Ubuntu、macOS 使用同一套 Compose 文件和同一套脚本。
+
+客户机器只需要先安装 Docker Desktop 或 Docker Engine + Compose 插件，不需要分别手动安装 Java、MySQL、Redis、Nginx。原生部署脚本仍保留为备用路径，但推荐优先使用 Docker。
 
 Docker Compose 会启动：
 
@@ -515,6 +560,10 @@ Docker Compose 会启动：
 2. Redis 7 容器。
 3. 后端 `aqy-admin.jar` 容器。
 4. Nginx 前端容器。
+
+### 全新测试/演示部署
+
+全新测试/演示部署会使用 Docker 内部 MySQL 数据卷，并在数据卷首次创建时导入初始化 SQL。
 
 按平台运行：
 
@@ -538,13 +587,46 @@ Docker Compose 中的 MySQL、Redis、后端、前端容器都配置了 `restart
 
 首次登录后必须立即修改管理员密码。
 
-> Docker Compose 路径适合全新测试/演示环境。它会使用 Docker 内部 MySQL 数据卷，只在该数据卷首次创建时导入初始化 SQL，不会自动连接、迁移或升级已有老数据库。已有老数据库、老服务器升级时，仍然使用对应平台的升级脚本，并在备份后按版本要求单独执行安全的数据库升级 SQL。
+> Fresh-test 路径只适合全新测试/演示环境。它不会自动连接、迁移或升级已有老数据库。
+
+### 已有 MySQL 数据迁移到 Docker
+
+如果老服务器已经有 MySQL 数据，推荐使用 Docker 迁移脚本把老库导入 Docker MySQL：
+
+```text
+Windows：双击 bin\RUN-DOCKER-MIGRATE-EXISTING-DB.bat
+Ubuntu ：执行 ./bin/RUN-DOCKER-MIGRATE-EXISTING-DB.sh
+macOS  ：双击 bin/RUN-DOCKER-MIGRATE-EXISTING-DB.command
+```
+
+迁移脚本会执行：
+
+1. 读取或询问老 MySQL 连接信息。
+2. 使用 Docker 内的 `mysqldump` 导出老库到 `backups/`。
+3. 启动 Docker MySQL 和 Redis。
+4. 重建 Docker 内目标库并导入老库 dump。
+5. 依次执行 `sql/migrations/*.sql` 中的安全升级脚本。
+6. 启动后端和前端容器。
+7. 检查后端健康接口并输出访问地址。
+
+迁移前仍然必须先备份老数据库。迁移脚本会把“升级问题”标准化为 `sql/migrations/*.sql`，但如果新版本确实需要表结构变化，仍然要把对应 SQL 放进该目录。
+
+### Docker 日常运维脚本
+
+| 场景 | Windows | Ubuntu | macOS |
+| --- | --- | --- | --- |
+| 查看状态和健康探测 | `RUN-DOCKER-STATUS.bat` | `RUN-DOCKER-STATUS.sh` | `RUN-DOCKER-STATUS.command` |
+| 停止服务，保留数据卷 | `RUN-DOCKER-STOP.bat` | `RUN-DOCKER-STOP.sh` | `RUN-DOCKER-STOP.command` |
+| 备份 Docker 内 MySQL | `RUN-DOCKER-BACKUP-DB.bat` | `RUN-DOCKER-BACKUP-DB.sh` | `RUN-DOCKER-BACKUP-DB.command` |
+| 从 SQL dump 恢复 | `RUN-DOCKER-RESTORE-DB.bat` | `RUN-DOCKER-RESTORE-DB.sh` | `RUN-DOCKER-RESTORE-DB.command` |
 
 下载到服务器后，先按系统和场景选脚本：
 
 | 系统 | 场景 | 使用脚本 | 是否初始化数据库 |
 | --- | --- | --- | --- |
 | Windows / Ubuntu / macOS | Docker Compose 全新测试/演示部署 | `RUN-DOCKER-FRESH-TEST.*` | 会初始化 Docker 内部空测试库 |
+| Windows / Ubuntu / macOS | 迁移已有 MySQL 到 Docker MySQL | `RUN-DOCKER-MIGRATE-EXISTING-DB.*` | 会导入老库并执行 `sql/migrations/*.sql` |
+| Windows / Ubuntu / macOS | Docker 数据库备份/恢复/状态/停止 | `RUN-DOCKER-BACKUP-DB.*` / `RUN-DOCKER-RESTORE-DB.*` / `RUN-DOCKER-STATUS.*` / `RUN-DOCKER-STOP.*` | 不会初始化数据库 |
 | Windows | 检查机器和配置是否准备好 | `bin\RUN-CHECK-WINDOWS-ENV.bat` | 不会修改数据库 |
 | Windows | 帮助安装 Java 8、MySQL、Redis、可选 Nginx | `bin\RUN-INSTALL-WINDOWS-PREREQS.bat` | 不会初始化数据库 |
 | Windows | 全新测试机、空数据库、可丢弃测试数据 | `bin\RUN-FRESH-WINDOWS-TEST.bat` | 会初始化空测试库 |

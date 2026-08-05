@@ -97,8 +97,35 @@ jobs:
           cp bin/RUN-DOCKER-FRESH-TEST.bat "${PACKAGE_DIR}/bin/RUN-DOCKER-FRESH-TEST.bat"
           cp bin/RUN-DOCKER-FRESH-TEST.sh "${PACKAGE_DIR}/bin/RUN-DOCKER-FRESH-TEST.sh"
           cp bin/RUN-DOCKER-FRESH-TEST.command "${PACKAGE_DIR}/bin/RUN-DOCKER-FRESH-TEST.command"
+          cp bin/RUN-DOCKER-MIGRATE-EXISTING-DB.bat "${PACKAGE_DIR}/bin/RUN-DOCKER-MIGRATE-EXISTING-DB.bat"
+          cp bin/RUN-DOCKER-MIGRATE-EXISTING-DB.sh "${PACKAGE_DIR}/bin/RUN-DOCKER-MIGRATE-EXISTING-DB.sh"
+          cp bin/RUN-DOCKER-MIGRATE-EXISTING-DB.command "${PACKAGE_DIR}/bin/RUN-DOCKER-MIGRATE-EXISTING-DB.command"
+          cp bin/RUN-DOCKER-BACKUP-DB.bat "${PACKAGE_DIR}/bin/RUN-DOCKER-BACKUP-DB.bat"
+          cp bin/RUN-DOCKER-BACKUP-DB.sh "${PACKAGE_DIR}/bin/RUN-DOCKER-BACKUP-DB.sh"
+          cp bin/RUN-DOCKER-BACKUP-DB.command "${PACKAGE_DIR}/bin/RUN-DOCKER-BACKUP-DB.command"
+          cp bin/RUN-DOCKER-RESTORE-DB.bat "${PACKAGE_DIR}/bin/RUN-DOCKER-RESTORE-DB.bat"
+          cp bin/RUN-DOCKER-RESTORE-DB.sh "${PACKAGE_DIR}/bin/RUN-DOCKER-RESTORE-DB.sh"
+          cp bin/RUN-DOCKER-RESTORE-DB.command "${PACKAGE_DIR}/bin/RUN-DOCKER-RESTORE-DB.command"
+          cp bin/RUN-DOCKER-STATUS.bat "${PACKAGE_DIR}/bin/RUN-DOCKER-STATUS.bat"
+          cp bin/RUN-DOCKER-STATUS.sh "${PACKAGE_DIR}/bin/RUN-DOCKER-STATUS.sh"
+          cp bin/RUN-DOCKER-STATUS.command "${PACKAGE_DIR}/bin/RUN-DOCKER-STATUS.command"
+          cp bin/RUN-DOCKER-STOP.bat "${PACKAGE_DIR}/bin/RUN-DOCKER-STOP.bat"
+          cp bin/RUN-DOCKER-STOP.sh "${PACKAGE_DIR}/bin/RUN-DOCKER-STOP.sh"
+          cp bin/RUN-DOCKER-STOP.command "${PACKAGE_DIR}/bin/RUN-DOCKER-STOP.command"
+          cp bin/docker-common.sh "${PACKAGE_DIR}/bin/docker-common.sh"
+          cp bin/docker-common.ps1 "${PACKAGE_DIR}/bin/docker-common.ps1"
           cp bin/docker-generate-env.sh "${PACKAGE_DIR}/bin/docker-generate-env.sh"
           cp bin/docker-generate-env.ps1 "${PACKAGE_DIR}/bin/docker-generate-env.ps1"
+          cp bin/docker-migrate-existing-db.sh "${PACKAGE_DIR}/bin/docker-migrate-existing-db.sh"
+          cp bin/docker-migrate-existing-db.ps1 "${PACKAGE_DIR}/bin/docker-migrate-existing-db.ps1"
+          cp bin/docker-backup-db.sh "${PACKAGE_DIR}/bin/docker-backup-db.sh"
+          cp bin/docker-backup-db.ps1 "${PACKAGE_DIR}/bin/docker-backup-db.ps1"
+          cp bin/docker-restore-db.sh "${PACKAGE_DIR}/bin/docker-restore-db.sh"
+          cp bin/docker-restore-db.ps1 "${PACKAGE_DIR}/bin/docker-restore-db.ps1"
+          cp bin/docker-status.sh "${PACKAGE_DIR}/bin/docker-status.sh"
+          cp bin/docker-status.ps1 "${PACKAGE_DIR}/bin/docker-status.ps1"
+          cp bin/docker-stop.sh "${PACKAGE_DIR}/bin/docker-stop.sh"
+          cp bin/docker-stop.ps1 "${PACKAGE_DIR}/bin/docker-stop.ps1"
           cp bin/unix-common.sh "${PACKAGE_DIR}/bin/unix-common.sh"
           cp bin/unix-preflight-check.sh "${PACKAGE_DIR}/bin/unix-preflight-check.sh"
           cp bin/unix-install-prerequisites.sh "${PACKAGE_DIR}/bin/unix-install-prerequisites.sh"
@@ -115,7 +142,13 @@ jobs:
           cp sql/zh_aqy_schema.sql "${PACKAGE_DIR}/sql/zh_aqy_schema.sql"
           cp sql/ry_20240629.sql "${PACKAGE_DIR}/sql/ry_20240629.sql"
           cp sql/quartz.sql "${PACKAGE_DIR}/sql/quartz.sql"
+          mkdir -p "${PACKAGE_DIR}/sql/migrations"
+          if compgen -G "sql/migrations/*.sql" > /dev/null; then
+            cp sql/migrations/*.sql "${PACKAGE_DIR}/sql/migrations/"
+          fi
           cp docker-compose.yml "${PACKAGE_DIR}/docker-compose.yml"
+          cp docker-compose.fresh.yml "${PACKAGE_DIR}/docker-compose.fresh.yml"
+          cp docker-compose.migrate.yml "${PACKAGE_DIR}/docker-compose.migrate.yml"
           cp .dockerignore "${PACKAGE_DIR}/.dockerignore"
           mkdir -p "${PACKAGE_DIR}/deploy"
           cp -R deploy/docker "${PACKAGE_DIR}/deploy/docker"
@@ -124,7 +157,7 @@ jobs:
           cat > "${PACKAGE_DIR}/START-HERE.txt" <<'EOF'
           Zh_AqY cross-platform release package
 
-          Recommended modern fresh-test path on Windows/Ubuntu/macOS:
+          Recommended Docker-first fresh-test path on Windows/Ubuntu/macOS:
           1. Install Docker Desktop or Docker Engine with Compose plugin.
           2. Run:
              Windows: .\bin\RUN-DOCKER-FRESH-TEST.bat
@@ -136,6 +169,21 @@ jobs:
           host reboot only if Docker itself starts automatically.
           Note: This fresh-test path uses Docker's internal MySQL volume and does
           not migrate or upgrade an existing external MySQL database.
+
+          Existing MySQL migration into Docker:
+          1. Back up the old MySQL database first.
+          2. Run:
+             Windows: .\bin\RUN-DOCKER-MIGRATE-EXISTING-DB.bat
+             Ubuntu : ./bin/RUN-DOCKER-MIGRATE-EXISTING-DB.sh
+             macOS  : double-click bin/RUN-DOCKER-MIGRATE-EXISTING-DB.command
+          3. The script dumps the old database, imports it into Docker MySQL,
+             applies sql/migrations/*.sql, starts Docker services, and checks health.
+
+          Docker operations:
+          - Status : RUN-DOCKER-STATUS.*
+          - Stop   : RUN-DOCKER-STOP.* (keeps Docker volumes)
+          - Backup : RUN-DOCKER-BACKUP-DB.*
+          - Restore: RUN-DOCKER-RESTORE-DB.*
 
           Windows existing-server upgrade:
           1. Back up the existing MySQL database first.

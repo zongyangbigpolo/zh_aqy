@@ -2,23 +2,14 @@
 set -euo pipefail
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd "${DIR}/.." && pwd)"
 
-cd "${ROOT_DIR}"
-"${DIR}/docker-generate-env.sh"
-set -a
 # shellcheck disable=SC1091
-source "${ROOT_DIR}/.env"
-set +a
+source "${DIR}/docker-common.sh"
 
-if docker compose version >/dev/null 2>&1; then
-  docker compose up -d --build
-elif command -v docker-compose >/dev/null 2>&1; then
-  docker-compose up -d --build
-else
-  echo "Docker Compose was not found. Install Docker Desktop or Docker Engine with Compose plugin first." >&2
-  exit 1
-fi
+require_docker
+ensure_env
+compose_fresh up -d --build
+wait_for_backend
 
 echo ""
 echo "Docker fresh-test deployment started."

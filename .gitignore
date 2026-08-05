@@ -45,6 +45,7 @@ nbdist/
 .DS_Store
 .svn/
 .env
+backups/
 baseDir/
 null/
 
